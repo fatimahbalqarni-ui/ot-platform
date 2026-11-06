@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>منصة رحلة مريض العلاج الوظيفي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a single reading column with a sticky language bar; the patient journey runs as a numbered path, features sit in a two-column grid, one worked example (wrist ROM) is charted. */
+:root{
+  --bg:#f4f6f3;
+  --surface:#ffffff;
+  --ink:#18262e;
+  --muted:#58666d;
+  --line:#dce3df;
+  --accent:#0d7a69;
+  --accent-soft:#e2f1ed;
+  --warm:#c8612e;
+  --warm-soft:#fbeee6;
+  --display:"Readex Pro","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --body:"IBM Plex Sans Arabic","Readex Pro",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111a1e;--surface:#18242a;--ink:#e6ecea;--muted:#9aa9ae;--line:#2a3940;
+    --accent:#3fbfa6;--accent-soft:#183a35;--warm:#ec8f5e;--warm-soft:#3a261c;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111a1e;--surface:#18242a;--ink:#e6ecea;--muted:#9aa9ae;--line:#2a3940;
+  --accent:#3fbfa6;--accent-soft:#183a35;--warm:#ec8f5e;--warm-soft:#3a261c;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.75}
+html[lang="ar"] [lang="en"]:not(html){display:none}
+html[lang="en"] [lang="ar"]:not(html){display:none}
+html[lang="en"] body{line-height:1.6}
+h1,h2,h3{font-family:var(--display);line-height:1.3;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,5vw,44px);font-weight:700}
+h2{font-size:clamp(22px,3.2vw,30px);font-weight:600}
+h3{font-size:18px;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1040px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--display);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+.lang button{font:600 14px var(--display);border:0;background:transparent;color:var(--muted);padding:6px 14px;border-radius:999px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:#fff}
+
+main{max-width:1040px;margin:0 auto;padding:0 20px 64px;display:grid;gap:64px}
+section{display:grid;gap:22px}
+.eyebrow{font:600 13px var(--display);letter-spacing:.04em;color:var(--accent);text-transform:uppercase}
+.lede{color:var(--muted);max-width:68ch;font-size:18px}
+
+.hero{padding-top:48px;display:grid;gap:18px}
+.hero .sub{font-family:var(--display);color:var(--muted);font-size:16px}
+.principle{border-inline-start:4px solid var(--warm);background:var(--warm-soft);padding:16px 20px;border-radius:0 10px 10px 0;max-width:72ch}
+html[dir="ltr"] .principle{border-radius:0 10px 10px 0}
+html[dir="rtl"] .principle{border-radius:10px 0 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 13px var(--display);padding:5px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:8px;align-content:start}
+.card p,.card li{color:var(--muted);font-size:15.5px}
+.card ul{margin:0;padding-inline-start:18px;display:grid;gap:2px}
+.tag{font:600 12px var(--display);color:var(--warm)}
+
+.journey{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:step}
+.journey li{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.journey li::before{counter-increment:step;content:counter(step);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:2px solid var(--accent);color:var(--accent);font:700 16px var(--display);font-variant-numeric:tabular-nums;z-index:1}
+.journey li:not(:last-child)::after{content:"";position:absolute;inset-inline-start:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.journey h3{margin-top:9px}
+.journey p{color:var(--muted);font-size:15.5px}
+
+.example{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:grid;gap:16px}
+.chart-wrap{overflow-x:auto}
+.chart-wrap svg{display:block;width:100%;min-width:480px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;background:var(--accent);display:inline-block}
+.sw.goal{background:none;border-top:2px dashed var(--warm);height:0}
+
+.portal{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.phone{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:10px}
+.phone .hd{font:600 14px var(--display);display:flex;justify-content:space-between;color:var(--muted)}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.ex .t{font:600 15px var(--display)}
+.ex .d{font-size:13.5px;color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.btns span{font:600 12px var(--display);padding:4px 10px;border-radius:8px;border:1px solid var(--line);color:var(--muted)}
+.btns .on{background:var(--accent);border-color:var(--accent);color:#fff}
+.btns .part{background:var(--warm-soft);border-color:var(--warm);color:var(--warm)}
+.meter{display:grid;gap:6px}
+.meter .row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.track{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:999px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.days div{aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font:600 12px var(--display);font-variant-numeric:tabular-nums}
+.d3{background:var(--accent);color:#fff}
+.d2{background:var(--accent-soft);color:var(--accent)}
+.d0{background:var(--surface);border:1px dashed var(--muted);color:var(--muted)}
+.note{font-size:13.5px;color:var(--muted)}
+
+.rules{display:grid;gap:10px}
+.rule{display:grid;grid-template-columns:6px 1fr;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.rule::before{content:"";background:var(--warm);border-radius:3px}
+.rule p{font-size:15.5px}
+
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.phase{border-top:4px solid var(--accent);background:var(--surface);border-radius:0 0 14px 14px;padding:18px 20px;display:grid;gap:8px;align-content:start;border-inline:1px solid var(--line);border-bottom:1px solid var(--line)}
+.phase:nth-child(2){border-top-color:color-mix(in srgb,var(--accent) 60%,var(--warm))}
+.phase:nth-child(3){border-top-color:var(--warm)}
+.phase ul{margin:0;padding-inline-start:18px;color:var(--muted);font-size:15px}
+
+.axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.axis{background:var(--accent-soft);border-radius:14px;padding:18px;display:grid;gap:4px}
+.axis b{font-family:var(--display);color:var(--accent)}
+.axis span{font-size:14px;color:var(--muted)}
+
+.closing{background:var(--ink);color:var(--bg);border-radius:18px;padding:32px 28px;display:grid;gap:12px}
+.closing p{color:color-mix(in srgb,var(--bg) 80%,var(--ink));max-width:70ch}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:0 20px 40px}
+@media (prefers-reduced-motion: no-preference){.lang button{transition:background .15s,color .15s}}
+</style>
+</head>
+<body>
+<div class="bar"><div class="bar-in">
+  <div class="brand"><span class="dot"></span><span lang="ar">منصة رحلة المريض في العلاج الوظيفي</span><span lang="en">OT Patient Journey Platform</span></div>
+  <div class="lang" role="group" aria-label="Language / اللغة">
+    <button type="button" id="btn-ar" data-lang="ar" aria-pressed="true">عربي</button>
+    <button type="button" id="btn-en" data-lang="en" aria-pressed="false">English</button>
+  </div>
+</div></div>
+
+<main>
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow"><span lang="ar">مقترح مشروع</span><span lang="en">Project proposal</span></div>
+  <h1><span lang="ar">منصة رقمية متكاملة لإدارة ومتابعة رحلة المريض في العلاج الوظيفي</span><span lang="en">Integrated Occupational Therapy Patient Journey, Rehabilitation Management &amp; Progress Tracking Platform</span></h1>
+  <p class="lede"><span lang="ar">من أول زيارة للعيادة، مرورًا بالتقييم والخطة العلاجية والجلسات والبرنامج المنزلي، وحتى إعادة التقييم والخروج من الخدمة والمتابعة اللاحقة، في سجل واحد قابل للقياس.</span><span lang="en">From the first clinic visit through assessment, treatment planning, sessions and the home program, to reassessment, discharge and follow-up, in one measurable record.</span></p>
+  <div class="principle"><p><span lang="ar"><b>المبدأ الأساسي:</b> تحويل رحلة المريض من جلسات علاجية منفصلة إلى مسار علاجي مترابط، يعرف فيه الأخصائي نقطة البداية، والتدخلات المستخدمة، وما تغيّر، ومدى تحقيق الأهداف الوظيفية.</span><span lang="en"><b>Core principle:</b> turn the patient's journey from separate sessions into one connected pathway, where the therapist can see the starting point, the interventions used, what changed, and how far functional goals were met.</span></p></div>
+  <div class="chips">
+    <span class="chip">Hand Therapy</span><span class="chip">Pediatric OT</span><span class="chip">Neuro Rehab</span><span class="chip">SOAP Notes</span><span class="chip">HEP</span><span class="chip">COPM · QuickDASH · GAS</span>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section>
+  <div class="eyebrow"><span lang="ar">المشكلة</span><span lang="en">The problem</span></div>
+  <h2><span lang="ar">المعلومات موجودة، لكنها متفرقة</span><span lang="en">The information exists, but it is scattered</span></h2>
+  <div class="grid2">
+    <div class="card"><h3><span lang="ar">الواقع الحالي</span><span lang="en">Today</span></h3>
+      <p><span lang="ar">التقييمات الأولية، والملاحظات السريرية، وتقارير الجلسات، والصور والفيديوهات، والبرامج المنزلية محفوظة في أماكن مختلفة. كل جلسة موثقة، لكن لا يوجد نظام يعرض المسار الكامل أو يوضح مقدار التحسن منذ بداية العلاج.</span><span lang="en">Initial assessments, clinical notes, session reports, photos, videos and home programs live in different places. Each session is documented, but nothing shows the full pathway or how much the patient has improved since the start.</span></p></div>
+    <div class="card"><h3><span lang="ar">ما تقدمه المنصة</span><span lang="en">What the platform adds</span></h3>
+      <p><span lang="ar">بيئة واحدة تجمع التوثيق السريري، وإدارة الخطط، وقياس النتائج الوظيفية، ومتابعة الالتزام بالبرنامج المنزلي، وتحليل تطور الحالة، والتواصل بين الأخصائي والمريض.</span><span lang="en">One environment that combines clinical documentation, plan management, functional outcome measurement, home-program adherence, progress analysis and therapist–patient communication.</span></p></div>
+  </div>
+</section>
+
+<!-- USERS -->
+<section>
+  <div class="eyebrow"><span lang="ar">المستخدمون</span><span lang="en">Users</span></div>
+  <h2><span lang="ar">واجهتان رئيسيتان ضمن نظام موحد</span><span lang="en">Two main portals in one system</span></h2>
+  <div class="grid2">
+    <div class="card"><span class="tag">Therapist Portal</span><h3><span lang="ar">واجهة الأخصائي</span><span lang="en">Therapist portal</span></h3>
+      <p><span lang="ar">النظام الرئيسي لإدارة الحالة: إنشاء الملف، والتقييمات، وتوثيق الجلسات، والصور والفيديوهات، والأهداف، وتصميم البرنامج العلاجي والمنزلي، وتحليل النتائج.</span><span lang="en">The main case-management system: patient file, assessments, session notes, photos and videos, goals, treatment and home program design, outcome analysis.</span></p></div>
+    <div class="card"><span class="tag">Patient Portal</span><h3><span lang="ar">واجهة المريض</span><span lang="en">Patient portal</span></h3>
+      <p><span lang="ar">امتداد الخطة العلاجية خارج العيادة: التمارين المنزلية، والفيديوهات التعليمية، وتسجيل الالتزام، ومتابعة التطور والأهداف.</span><span lang="en">The treatment plan outside the clinic: home exercises, instructional videos, adherence logging, progress and goals.</span></p></div>
+    <div class="card"><span class="tag">Caregiver</span><h3><span lang="ar">حساب ولي الأمر أو مقدم الرعاية</span><span lang="en">Parent or caregiver account</span></h3>
+      <p><span lang="ar">للأطفال والمرضى الذين يحتاجون مساعدة: متابعة الخطة، وتنفيذ الأنشطة المنزلية، وتسجيل ملاحظات عن أداء المريض.</span><span lang="en">For children and patients who need help: follow the plan, carry out home activities, and record notes on the patient's performance.</span></p></div>
+    <div class="card"><span class="tag">Administrative Dashboard</span><h3><span lang="ar">لوحة الإدارة</span><span lang="en">Administration dashboard</span></h3>
+      <p><span lang="ar">مستوى اختياري لمتابعة مؤشرات الأداء وجودة الخدمة، دون صلاحية الاطلاع على المعلومات الصحية التفصيلية.</span><span lang="en">An optional level for performance and quality indicators, without access to detailed health information.</span></p></div>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section>
+  <div class="eyebrow"><span lang="ar">رحلة المريض</span><span lang="en">Patient journey</span></div>
+  <h2><span lang="ar">من التسجيل حتى ما بعد الخروج</span><span lang="en">From registration to after discharge</span></h2>
+  <ol class="journey">
+    <li><div><h3><span lang="ar">التسجيل وإنشاء الملف</span><span lang="en">Registration and patient file</span></h3><p><span lang="ar">رقم تعريفي خاص، والتشخيص، وسبب الإحالة، والتاريخ المرضي، والاحتياطات الطبية، والمشكلات الوظيفية، في سجل علاجي واحد.</span><span lang="en">A unique ID, diagnosis, referral reason, medical history, precautions and functional problems in a single record.</span></p></div></li>
+    <li><div><h3><span lang="ar">التقييم الأولي والقياسات المرجعية</span><span lang="en">Initial assessment and baseline</span></h3><p><span lang="ar">نموذج تقييم حسب التخصص، وقياسات مثل ROM وقوة العضلات وقوة القبضة والمهارات الحركية الدقيقة وأداء ADL، وأدوات مقننة مثل QuickDASH وCOPM وGAS. تُحفظ كقياسات مرجعية للمقارنة لاحقًا.</span><span lang="en">Specialty-specific templates, measures such as ROM, muscle strength, grip strength, fine motor skills and ADL performance, plus standardized tools like QuickDASH, COPM and GAS. Saved as the baseline for later comparison.</span></p></div></li>
+    <li><div><h3><span lang="ar">الخطة العلاجية والأهداف</span><span lang="en">Treatment plan and goals</span></h3><p><span lang="ar">أهداف قصيرة وطويلة المدى بمبادئ SMART، كل هدف مرتبط بمؤشر قابل للقياس، ومستوى حالي ومستهدف ومدة. الخطة قابلة للتعديل مع سجل تاريخي للتعديلات وأسبابها.</span><span lang="en">Short and long-term SMART goals, each tied to a measurable indicator with current level, target and timeframe. The plan can change, with a history of every revision and its reason.</span></p></div></li>
+    <li><div><h3><span lang="ar">الجلسات العلاجية</span><span lang="en">Treatment sessions</span></h3><p><span lang="ar">آخر تقييم والأهداف الحالية أمام الأخصائي فور فتح الملف. توثيق بنموذج SOAP، وصور وفيديوهات مرتبطة بالجلسة، وقياسات دورية حسب ما تحتاجه الحالة.</span><span lang="en">The latest assessment and current goals appear as soon as the file opens. SOAP documentation, session-linked photos and videos, and periodic measures chosen per case.</span></p></div></li>
+    <li><div><h3><span lang="ar">البرنامج المنزلي</span><span lang="en">Home exercise program</span></h3><p><span lang="ar">تمارين من مكتبة جاهزة أو مخصصة، بالتكرارات والمجموعات والمدة والفيديو التوضيحي، يسجل المريض إنجازها يوميًا.</span><span lang="en">Exercises from a library or custom-built, with reps, sets, duration and a demo video; the patient logs them daily.</span></p></div></li>
+    <li><div><h3><span lang="ar">إعادة التقييم</span><span lang="en">Reassessment</span></h3><p><span lang="ar">مقارنة بالقياسات المرجعية، ومقدار التغير، والتقدم نحو الأهداف، والالتزام بالبرنامج المنزلي، ثم قرار الاستمرار أو التعديل أو التحويل.</span><span lang="en">Comparison with baseline, amount of change, progress toward goals and home-program adherence, then a decision to continue, adjust or refer.</span></p></div></li>
+    <li><div><h3><span lang="ar">الخروج من الخدمة</span><span lang="en">Discharge</span></h3><p><span lang="ar">تقرير خروج (Discharge Summary) بصيغة PDF يشمل النتائج والرسوم البيانية وملخص الالتزام وسبب الخروج والتوصيات.</span><span lang="en">A PDF discharge summary with outcomes, charts, adherence summary, discharge reason and recommendations.</span></p></div></li>
+    <li><div><h3><span lang="ar">المتابعة اللاحقة</span><span lang="en">Follow-up</span></h3><p><span lang="ar">جدولة متابعة لتقييم استمرارية النتائج الوظيفية بعد انتهاء الجلسات.</span><span lang="en">Scheduled follow-up to check that functional gains last after sessions end.</span></p></div></li>
+  </ol>
+</section>
+
+<!-- PROGRESS EXAMPLE -->
+<section>
+  <div class="eyebrow"><span lang="ar">قياس التحسن</span><span lang="en">Progress tracking</span></div>
+  <h2><span lang="ar">لوحة واحدة بدل مراجعة عشرات الملاحظات</span><span lang="en">One view instead of reading dozens of notes</span></h2>
+  <div class="example">
+    <div><h3><span lang="ar">مثال: مدى حركة الرسغ بعد كسر Distal Radius</span><span lang="en">Example: wrist ROM after a distal radius fracture</span></h3>
+    <p class="note"><span lang="ar">القيم من وصف المشروع: 20 ثم 28 و35 و43 و52 و60 درجة. خط الهدف للتوضيح فقط.</span><span lang="en">Values from the project description: 20, then 28, 35, 43, 52 and 60 degrees. The goal line is illustrative.</span></p></div>
+    <div class="chart-wrap" dir="ltr">
+      <svg viewBox="0 0 640 280" role="img" aria-label="Wrist ROM: 20, 28, 35, 43, 52, 60 degrees across six visits">
+        <g stroke="var(--line)" stroke-width="1">
+          <line x1="60" y1="240" x2="610" y2="240"/><line x1="60" y1="190" x2="610" y2="190"/><line x1="60" y1="140" x2="610" y2="140"/><line x1="60" y1="90" x2="610" y2="90"/><line x1="60" y1="40" x2="610" y2="40"/>
+        </g>
+        <g fill="var(--muted)" font-size="12" font-family="Readex Pro, sans-serif" text-anchor="end">
+          <text x="50" y="244">0°</text><text x="50" y="194">20°</text><text x="50" y="144">40°</text><text x="50" y="94">60°</text><text x="50" y="44">80°</text>
+        </g>
+        <line x1="60" y1="77.5" x2="610" y2="77.5" stroke="var(--warm)" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="606" y="70" fill="var(--warm)" font-size="12" font-family="Readex Pro, sans-serif" text-anchor="end">Goal 65°</text>
+        <path d="M80 190 L182 170 L284 152.5 L386 132.5 L488 110 L590 90 L590 240 L80 240 Z" fill="var(--accent)" opacity=".12"/>
+        <polyline points="80,190 182,170 284,152.5 386,132.5 488,110 590,90" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>
+        <g fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5">
+          <circle cx="80" cy="190" r="5"/><circle cx="182" cy="170" r="5"/><circle cx="284" cy="152.5" r="5"/><circle cx="386" cy="132.5" r="5"/><circle cx="488" cy="110" r="5"/>
+        </g>
+        <circle cx="590" cy="90" r="7" fill="var(--accent)"/>
+        <g fill="var(--ink)" font-size="13" font-weight="600" font-family="Readex Pro, sans-serif" text-anchor="middle">
+          <text x="80" y="178">20°</text><text x="182" y="158">28°</text><text x="284" y="140">35°</text><text x="386" y="120">43°</text><text x="488" y="98">52°</text><text x="590" y="113">60°</text>
+        </g>
+        <g fill="var(--muted)" font-size="12" font-family="Readex Pro, sans-serif" text-anchor="middle">
+          <text x="80" y="262">Baseline</text><text x="182" y="262">V2</text><text x="284" y="262">V3</text><text x="386" y="262">V4</text><text x="488" y="262">V5</text><text x="590" y="262">V6</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend"><span><i class="sw"></i><span lang="ar">مدى الحركة المسجل</span><span lang="en">Recorded ROM</span></span><span><i class="sw goal"></i><span lang="ar">الهدف المحدد مسبقًا</span><span lang="en">Pre-set goal</span></span></div>
+    <p class="note"><span lang="ar">يمكن عرض مؤشرات أخرى بنفس الطريقة: قوة القبضة، والألم، والأداء الوظيفي، ومستوى المساعدة. ويراعي النظام اتجاه كل مقياس، فانخفاض درجة الألم أو الإعاقة يعني تحسنًا.</span><span lang="en">Other indicators can be charted the same way: grip strength, pain, function, level of assistance. The system respects each measure's direction: a lower pain or disability score means improvement.</span></p>
+  </div>
+</section>
+
+<!-- HEP + ADHERENCE -->
+<section>
+  <div class="eyebrow"><span lang="ar">البرنامج المنزلي والالتزام</span><span lang="en">Home program and adherence</span></div>
+  <h2><span lang="ar">ما يراه المريض، وما يراه الأخصائي</span><span lang="en">What the patient sees, and what the therapist sees</span></h2>
+  <div class="portal">
+    <div class="phone">
+      <div class="hd"><span lang="ar">تمارين اليوم</span><span lang="en">Today's exercises</span><span lang="ar">بوابة المريض</span><span lang="en">Patient portal</span></div>
+      <div class="ex"><div class="t"><span lang="ar">ثني ومد الرسغ</span><span lang="en">Wrist flexion and extension</span></div><div class="d"><span lang="ar">3 مجموعات × 10 تكرارات · فيديو توضيحي</span><span lang="en">3 sets × 10 reps · demo video</span></div>
+        <div class="btns"><span class="on"><span lang="ar">تم</span><span lang="en">Completed</span></span><span><span lang="ar">جزئيًا</span><span lang="en">Partial</span></span><span><span lang="ar">لم أتمكن</span><span lang="en">Skipped</span></span></div></div>
+      <div class="ex"><div class="t"><span lang="ar">تقوية القبضة بالإسفنجة</span><span lang="en">Grip strengthening with sponge</span></div><div class="d"><span lang="ar">مرتان يوميًا · 5 دقائق</span><span lang="en">Twice daily · 5 minutes</span></div>
+        <div class="btns"><span><span lang="ar">تم</span><span lang="en">Completed</span></span><span class="part"><span lang="ar">جزئيًا · ألم خفيف</span><span lang="en">Partial · mild pain</span></span><span><span lang="ar">لم أتمكن</span><span lang="en">Skipped</span></span></div></div>
+      <p class="note"><span lang="ar">بيانات توضيحية. يمكن للمريض ذكر السبب: ألم، صعوبة، وقت، أو عدم فهم التعليمات.</span><span lang="en">Illustrative data. The patient can give a reason: pain, difficulty, time, or unclear instructions.</span></p>
+    </div>
+    <div class="card">
+      <span class="tag">Home Exercise Adherence Dashboard</span>
+      <h3><span lang="ar">لوحة الالتزام لدى الأخصائي</span><span lang="en">Therapist adherence dashboard</span></h3>
+      <div class="meter"><div class="row"><span lang="ar">3 تمارين × 7 أيام = 21 تمرينًا مجدولًا</span><span lang="en">3 exercises × 7 days = 21 scheduled</span><b>16 / 21 · 76%</b></div><div class="track"><div class="fill" style="width:76%"></div></div></div>
+      <div class="days" dir="ltr" aria-label="Exercises reported per day">
+        <div class="d3">3</div><div class="d3">3</div><div class="d2">2</div><div class="d0">–</div><div class="d3">3</div><div class="d2">2</div><div class="d3">3</div>
+      </div>
+      <p class="note"><span lang="ar">مثال توضيحي. اليوم المنقط لم يُسجَّل فيه شيء، ويُميَّز عن التمرين الذي أفاد المريض بعدم أدائه.</span><span lang="en">Illustrative example. The dashed day had no entry, which is kept separate from an exercise the patient reported as skipped.</span></p>
+      <p><span lang="ar">تنبيه عند انخفاض الالتزام أو تكرار تجاوز تمرين معين، لمراجعة العوائق مع المريض.</span><span lang="en">An alert when adherence drops or one exercise is skipped repeatedly, so barriers can be discussed with the patient.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section>
+  <div class="eyebrow"><span lang="ar">الخصائص الأساسية</span><span lang="en">Core features</span></div>
+  <h2><span lang="ar">كل ما يحتاجه الأخصائي في مكان واحد</span><span lang="en">Everything the therapist needs in one place</span></h2>
+  <div class="grid3">
+    <div class="card"><span class="tag">Visual Clinical Documentation</span><h3><span lang="ar">التوثيق البصري والمقارنة</span><span lang="en">Visual documentation and comparison</span></h3><p><span lang="ar">صور وفيديوهات مرتبطة بالجلسة والهدف، وعرض قبل وبعد جنبًا إلى جنب، مع توثيق الوضعية وزاوية التصوير ومستوى المساعدة لضمان مقارنة عادلة.</span><span lang="en">Photos and videos linked to session and goal, side-by-side before/after view, with position, camera angle and assistance level recorded so comparisons are fair.</span></p></div>
+    <div class="card"><span class="tag">HEP Adherence × Outcomes</span><h3><span lang="ar">ربط الالتزام بالنتائج</span><span lang="en">Adherence linked to outcomes</span></h3><p><span lang="ar">منحنى الالتزام بجانب منحنى التحسن للفترة نفسها، لدعم النقاش السريري حول الجرعة ودقة الأداء والعوائق.</span><span lang="en">The adherence curve beside the outcome curve for the same period, to support clinical discussion of dose, technique and barriers.</span></p></div>
+    <div class="card"><span class="tag">My Progress</span><h3><span lang="ar">صفحة تقدمي للمريض</span><span lang="en">My Progress for patients</span></h3><p><span lang="ar">عرض مبسط للأهداف والتغيرات، وسجل إنجازات وظيفية مثل ارتداء الملابس بمساعدة أقل.</span><span lang="en">A simple view of goals and changes, with functional milestones such as dressing with less help.</span></p></div>
+    <div class="card"><span class="tag">Clinical Dashboard</span><h3><span lang="ar">لوحة تحكم الأخصائي</span><span lang="en">Therapist dashboard</span></h3><p><span lang="ar">المرضى النشطون، والجلسات، والحالات المستحقة لإعادة التقييم، ومن اقترب من أهدافه، ومن لم يسجل تمارينه.</span><span lang="en">Active patients, sessions, cases due for reassessment, those near their goals, and those not logging exercises.</span></p></div>
+    <div class="card"><span class="tag">Reminders &amp; Notifications</span><h3><span lang="ar">التذكيرات والتواصل</span><span lang="en">Reminders and messaging</span></h3><p><span lang="ar">تذكير بالتمارين والجلسات بأوقات قابلة للتعديل، وإشعار عند تغيير الخطة، وقناة آمنة للاستفسارات بنطاق وأوقات استجابة محددة.</span><span lang="en">Adjustable exercise and session reminders, alerts on plan changes, and a secure channel for questions with a defined scope and response time.</span></p></div>
+    <div class="card"><span class="tag">AI-Assisted Documentation</span><h3><span lang="ar">التوثيق الذكي</span><span lang="en">AI-assisted documentation</span></h3><p><span lang="ar">مساعدة في صياغة SOAP Notes وملخصات التقدم وتقارير إعادة التقييم، والتنبيه إلى البيانات الناقصة. الأخصائي يراجع ويعتمد.</span><span lang="en">Help drafting SOAP notes, progress summaries and reassessment reports, and flagging missing data. The therapist reviews and signs off.</span></p></div>
+    <div class="card"><span class="tag">Clinical Analytics</span><h3><span lang="ar">تحليلات الجودة</span><span lang="en">Quality analytics</span></h3><p><span lang="ar">متوسط عدد الجلسات، ومعدلات الإكمال وتحقيق الأهداف، والالتزام، وأسباب الانقطاع، ومدد الانتظار على مستوى القسم.</span><span lang="en">Average sessions, completion and goal-attainment rates, adherence, dropout reasons and waiting times at department level.</span></p></div>
+    <div class="card"><span class="tag">Discharge Summary</span><h3><span lang="ar">التقارير النهائية</span><span lang="en">Final reports</span></h3><p><span lang="ar">تقرير خروج تلقائي من البيانات المجمعة، مع الرسوم البيانية والصور المقارنة عند السماح، بصيغة PDF.</span><span lang="en">A discharge report built from collected data, with charts and comparison images where permitted, as a PDF.</span></p></div>
+    <div class="card"><span class="tag">Progress Alerts</span><h3><span lang="ar">تنبيهات غياب التقدم</span><span lang="en">No-progress alerts</span></h3><p><span lang="ar">إشارة إلى فترات الاستقرار أو التراجع، دون افتراض أن كل تغير في القياس تغير سريري مهم.</span><span lang="en">Flags plateaus or decline, without assuming every change in a measure is clinically meaningful.</span></p></div>
+  </div>
+</section>
+
+<!-- SPECIALTIES -->
+<section>
+  <div class="eyebrow"><span lang="ar">التخصصات</span><span lang="en">Specialties</span></div>
+  <h2><span lang="ar">مؤشرات مختلفة لكل مجال</span><span lang="en">Different indicators for each field</span></h2>
+  <div class="grid3">
+    <div class="card"><h3><span lang="ar">علاج اليد</span><span lang="en">Hand therapy</span></h3><ul><li><span lang="ar">مدى الحركة</span><span lang="en">Range of motion</span></li><li><span lang="ar">قوة القبضة والقرص</span><span lang="en">Grip and pinch strength</span></li><li><span lang="ar">الألم والتورم</span><span lang="en">Pain and swelling</span></li><li><span lang="ar">المهارات اليدوية ووظيفة الطرف العلوي</span><span lang="en">Dexterity and upper-limb function</span></li></ul></div>
+    <div class="card"><h3><span lang="ar">العلاج الوظيفي للأطفال</span><span lang="en">Pediatric OT</span></h3><ul><li><span lang="ar">الأهداف الوظيفية الفردية</span><span lang="en">Individual functional goals</span></li><li><span lang="ar">الاستقلالية في الأنشطة اليومية</span><span lang="en">Independence in daily activities</span></li><li><span lang="ar">المهارات الحركية الدقيقة</span><span lang="en">Fine motor skills</span></li><li><span lang="ar">المشاركة ومستوى المساعدة</span><span lang="en">Participation and level of assistance</span></li></ul></div>
+    <div class="card"><h3><span lang="ar">التأهيل العصبي</span><span lang="en">Neurological rehabilitation</span></h3><ul><li><span lang="ar">وظيفة الطرف العلوي</span><span lang="en">Upper-limb function</span></li><li><span lang="ar">أداء الأنشطة اليومية</span><span lang="en">ADL performance</span></li><li><span lang="ar">مستوى الاستقلالية</span><span lang="en">Level of independence</span></li><li><span lang="ar">أهداف المشاركة في الحياة اليومية</span><span lang="en">Participation goals</span></li></ul></div>
+  </div>
+</section>
+
+<!-- SAFEGUARDS -->
+<section>
+  <div class="eyebrow"><span lang="ar">ضوابط سريرية</span><span lang="en">Clinical safeguards</span></div>
+  <h2><span lang="ar">المنصة تدعم القرار، ولا تتخذه</span><span lang="en">The platform supports decisions; it does not make them</span></h2>
+  <div class="rules">
+    <div class="rule"><p><span lang="ar">تسجيل إكمال التمرين تقرير ذاتي من المريض، وليس دليلًا على أدائه بالطريقة الصحيحة.</span><span lang="en">A completed exercise is the patient's self-report, not proof it was done correctly.</span></p></div>
+    <div class="rule"><p><span lang="ar">العلاقة بين الالتزام والتحسن لا تثبت السببية؛ فالتعافي الطبيعي والجلسات وشدة الإصابة عوامل مؤثرة.</span><span lang="en">An association between adherence and improvement is not causation; natural recovery, clinic sessions and injury severity all play a part.</span></p></div>
+    <div class="rule"><p><span lang="ar">حالة الهدف يحددها التقييم السريري للأخصائي، ولا يُعد الهدف محققًا لمجرد الالتزام بالتمارين.</span><span lang="en">Goal status is set by the therapist's clinical judgement; a goal is not met just because exercises were done.</span></p></div>
+    <div class="rule"><p><span lang="ar">أدوات الذكاء الاصطناعي لا تصدر تشخيصات ولا تخترع نتائج ولا تتخذ قرارات علاجية تلقائية.</span><span lang="en">AI tools do not diagnose, invent results, or make treatment decisions on their own.</span></p></div>
+    <div class="rule"><p><span lang="ar">المنصة ليست وسيلة مراقبة طبية فورية، وتتضمن تعليمات واضحة عن الأعراض التي تستدعي إيقاف التمارين.</span><span lang="en">The platform is not real-time medical monitoring, and gives clear guidance on symptoms that mean stop exercising.</span></p></div>
+    <div class="rule"><p><span lang="ar">مؤشرات التحسن وحدها لا تُستخدم للحكم على أداء الأخصائيين.</span><span lang="en">Outcome indicators alone are not used to judge therapists' performance.</span></p></div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section>
+  <div class="eyebrow"><span lang="ar">الخصوصية والأمان</span><span lang="en">Privacy and security</span></div>
+  <h2><span lang="ar">بيانات صحية حساسة تتطلب حماية مدروسة</span><span lang="en">Sensitive health data needs deliberate protection</span></h2>
+  <div class="grid2">
+    <div class="card"><h3><span lang="ar">الضوابط التقنية</span><span lang="en">Technical controls</span></h3><ul><li><span lang="ar">صلاحيات حسب الدور</span><span lang="en">Role-based permissions</span></li><li><span lang="ar">التحقق من الهوية والتشفير</span><span lang="en">Authentication and encryption</span></li><li><span lang="ar">سجل الوصول والتعديل</span><span lang="en">Access and edit audit log</span></li><li><span lang="ar">النسخ الاحتياطي وسياسات الاحتفاظ والحذف</span><span lang="en">Backup, retention and deletion policies</span></li><li><span lang="ar">فصل ما يراه الأخصائي عما يراه المريض</span><span lang="en">Separate therapist and patient views</span></li></ul></div>
+    <div class="card"><h3><span lang="ar">الامتثال والموافقات</span><span lang="en">Compliance and consent</span></h3><ul><li><span lang="ar">نظام حماية البيانات الشخصية (PDPL)</span><span lang="en">Saudi Personal Data Protection Law (PDPL)</span></li><li><span lang="ar">الضوابط السيبرانية وسياسات المنشأة</span><span lang="en">Cybersecurity controls and facility policies</span></li><li><span lang="ar">موافقة قبل التصوير، وعناية خاصة ببيانات الأطفال</span><span lang="en">Consent before filming, with extra care for children</span></li><li><span lang="ar">موافقة التوثيق لا تشمل التسويق أو البحث أو تدريب نماذج الذكاء الاصطناعي</span><span lang="en">Documentation consent does not cover marketing, research or AI training</span></li></ul></div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section>
+  <div class="eyebrow"><span lang="ar">مراحل التنفيذ</span><span lang="en">Roadmap</span></div>
+  <h2><span lang="ar">إطلاق تدريجي يبدأ بالأساسيات</span><span lang="en">A phased launch, starting with the essentials</span></h2>
+  <div class="phases">
+    <div class="phase"><span class="tag">MVP</span><h3><span lang="ar">المرحلة الأولى</span><span lang="en">Phase 1</span></h3><ul><li><span lang="ar">حسابات الأخصائي والمريض</span><span lang="en">Therapist and patient accounts</span></li><li><span lang="ar">الملفات والتقييمات والجلسات</span><span lang="en">Files, assessments, sessions</span></li><li><span lang="ar">الصور والفيديوهات</span><span lang="en">Photos and videos</span></li><li><span lang="ar">الخطط والبرامج المنزلية وتسجيل الإنجاز</span><span lang="en">Plans, home programs, completion logging</span></li><li><span lang="ar">منحنيات التحسن والتقارير الأساسية</span><span lang="en">Progress charts and basic reports</span></li></ul></div>
+    <div class="phase"><h3><span lang="ar">المرحلة الثانية</span><span lang="en">Phase 2</span></h3><ul><li><span lang="ar">مكتبة تمارين متخصصة</span><span lang="en">Specialized exercise library</span></li><li><span lang="ar">مقارنة الصور والفيديوهات</span><span lang="en">Photo and video comparison</span></li><li><span lang="ar">تنبيهات إعادة التقييم</span><span lang="en">Reassessment alerts</span></li><li><span lang="ar">لوحات الالتزام وتحليلات أعمق</span><span lang="en">Adherence dashboards, deeper analytics</span></li></ul></div>
+    <div class="phase"><h3><span lang="ar">المرحلة الثالثة</span><span lang="en">Phase 3</span></h3><ul><li><span lang="ar">أدوات الذكاء الاصطناعي المساعدة</span><span lang="en">AI assistance tools</span></li><li><span lang="ar">تحليلات متقدمة</span><span lang="en">Advanced analytics</span></li><li><span lang="ar">التواصل الآمن</span><span lang="en">Secure messaging</span></li><li><span lang="ar">التكامل مع الأنظمة الصحية الأخرى</span><span lang="en">Integration with other health systems</span></li></ul></div>
+  </div>
+  <p class="note"><span lang="ar">يبدأ التطوير ببيانات افتراضية، ثم اختبار قابلية الاستخدام مع مجموعة محدودة من الأخصائيين، قبل التعامل مع بيانات مرضى حقيقيين.</span><span lang="en">Development starts with synthetic data, then usability testing with a small group of therapists, before any real patient data is used.</span></p>
+</section>
+
+<!-- VALUE -->
+<section>
+  <div class="eyebrow"><span lang="ar">القيمة المضافة</span><span lang="en">Value</span></div>
+  <h2><span lang="ar">ثلاثة محاور مترابطة في نظام واحد</span><span lang="en">Three connected pillars in one system</span></h2>
+  <div class="axes">
+    <div class="axis"><b><span lang="ar">التقدم السريري والوظيفي</span><span lang="en">Clinical &amp; functional progress</span></b><span>Clinical &amp; Functional Progress</span></div>
+    <div class="axis"><b><span lang="ar">الالتزام بالبرنامج المنزلي</span><span lang="en">Home exercise adherence</span></b><span>Home Exercise Adherence</span></div>
+    <div class="axis"><b><span lang="ar">مشاركة المريض</span><span lang="en">Patient engagement</span></b><span>Patient Engagement</span></div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3><span lang="ar">مهنيًا</span><span lang="en">Clinical</span></h3><p><span lang="ar">استمرارية الرعاية، وتقليل تشتت المعلومات، وتسهيل متابعة النتائج.</span><span lang="en">Continuity of care, less scattered information, easier outcome tracking.</span></p></div>
+    <div class="card"><h3><span lang="ar">إداريًا</span><span lang="en">Administrative</span></h3><p><span lang="ar">بيانات منظمة لتحسين الجودة وإظهار أثر العلاج الوظيفي.</span><span lang="en">Structured data for quality improvement and showing OT's impact.</span></p></div>
+    <div class="card"><h3><span lang="ar">تجاريًا</span><span lang="en">Commercial</span></h3><p><span lang="ar">نظام اشتراكات SaaS للأخصائيين والعيادات ومراكز التأهيل، بعد دراسة السوق والمتطلبات التنظيمية.</span><span lang="en">A SaaS subscription for therapists, clinics and rehab centers, after market and regulatory study.</span></p></div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section class="closing">
+  <div class="eyebrow" style="color:var(--accent)"><span lang="ar">الرؤية</span><span lang="en">Vision</span></div>
+  <h2><span lang="ar">من توثيق الجلسات إلى إدارة رحلة تأهيلية متكاملة</span><span lang="en">From documenting sessions to managing a complete rehabilitation journey</span></h2>
+  <p><span lang="ar">رحلة تتمحور حول المريض، وتعتمد على نتائج وظيفية قابلة للقياس، وتربط ما يحدث في العيادة بما يفعله المريض في حياته اليومية، مع بقاء الأخصائي صاحب التقييم والتفسير والقرار العلاجي، دعمًا لممارسة العلاج الوظيفي القائمة على الأدلة.</span><span lang="en">A patient-centred journey built on measurable functional outcomes, linking what happens in the clinic to what the patient does in daily life, with the therapist still owning assessment, interpretation and treatment decisions, in support of evidence-based occupational therapy practice.</span></p>
+</section>
+</main>
+<footer><span lang="ar">مقترح مشروع · العلاج الوظيفي</span><span lang="en">Project proposal · Occupational Therapy</span></footer>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var titles={ar:"منصة رحلة مريض العلاج الوظيفي",en:"OT Patient Journey Platform"};
+  function setLang(l){
+    root.lang=l; root.dir=(l==="ar")?"rtl":"ltr";
+    document.title=titles[l];
+    document.querySelectorAll(".lang button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.lang===l?"true":"false");});
+    try{localStorage.setItem("ot-lang",l);}catch(e){}
+  }
+  document.querySelectorAll(".lang button").forEach(function(b){b.addEventListener("click",function(){setLang(b.dataset.lang);});});
+  var saved=null; try{saved=localStorage.getItem("ot-lang");}catch(e){}
+  if(saved==="en"||saved==="ar") setLang(saved);
+})();
+</script>
+</body>
+</html>
