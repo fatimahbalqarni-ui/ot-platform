@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>منصة العلاج الوظيفي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* App shell: sticky top bar (brand, role, language), a nav row, and one content column of cards. Mobile first. */
+:root{
+  --bg:#f4f6f3;--surface:#fff;--ink:#18262e;--muted:#5a676e;--line:#dce3df;
+  --accent:#0d7a69;--accent-soft:#e2f1ed;--warm:#c8612e;--warm-soft:#fbeee6;
+  --good:#1f8a4c;--warn:#b7791f;--warn-soft:#fdf3dc;--crit:#c0392b;--crit-soft:#fbe5e2;
+  --display:"Readex Pro","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --body:"IBM Plex Sans Arabic","Readex Pro",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+h1,h2,h3,h4{font-family:var(--display);margin:0;line-height:1.3;text-wrap:balance}
+h1{font-size:24px}h2{font-size:19px}h3{font-size:16px}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font:600 15px var(--display);display:flex;align-items:center;gap:8px;margin-inline-end:auto}
+.logo{width:28px;height:28px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 13px var(--display)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--bg)}
+.seg button{border:0;background:transparent;color:var(--muted);padding:5px 12px;border-radius:999px;cursor:pointer;font:600 13px var(--display)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.nav{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}
+.nav button{border:0;background:none;padding:10px 12px;font:600 14px var(--display);color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.nav button[aria-current="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px;display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{justify-content:space-between}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:2px}
+.kpi b{font:700 26px var(--display);font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi.hot b{color:var(--crit)}
+.muted{color:var(--muted)}
+.small{font-size:13.5px}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;cursor:pointer;font:600 14px var(--display);display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.warm{background:var(--warm);border-color:var(--warm);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent);padding:6px 8px}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn.danger{color:var(--crit)}
+
+.chip{display:inline-flex;align-items:center;gap:4px;font:600 12px var(--display);padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+.chip.grey{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.chip.warm{background:var(--warm-soft);color:var(--warm)}
+
+.alert{display:grid;grid-template-columns:5px 1fr;gap:12px;padding:10px 12px;border-radius:10px;background:var(--bg);align-items:start}
+.alert::before{content:"";border-radius:3px;align-self:stretch;background:var(--accent)}
+.alert.warn::before{background:var(--warn)}.alert.crit::before{background:var(--crit)}
+.alert a,.alert button.link{color:var(--ink);font-weight:600}
+
+.plist{display:grid;gap:10px}
+.pcard{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;width:100%}
+.pcard:hover{border-color:var(--accent)}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 16px var(--display);background:var(--accent-soft);color:var(--accent)}
+.avatar.peds{background:var(--warm-soft);color:var(--warm)}
+.avatar.neuro{background:#e8e6f6;color:#4b3f9c}
+.pname{font:600 15px var(--display)}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font:600 13px var(--display);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:start;white-space:nowrap}
+th{font:600 12.5px var(--display);color:var(--muted)}
+td.num,th.num{text-align:end}
+.better{color:var(--good);font-weight:600}.worse{color:var(--crit);font-weight:600}
+
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar.warn > i{background:var(--warn)}.bar.crit > i{background:var(--crit)}
+
+.chart{overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto}
+
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{border-radius:10px;padding:6px 2px;text-align:center;font-size:11.5px;display:grid;gap:2px;border:1px solid var(--line);background:var(--surface)}
+.day b{font:700 13px var(--display);font-variant-numeric:tabular-nums}
+.day.full{background:var(--accent);border-color:var(--accent);color:#fff}
+.day.part{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.day.none{border-style:dashed;color:var(--muted)}
+.day.today{outline:2px solid var(--warm);outline-offset:1px}
+
+.ex{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:var(--surface)}
+.ex.done{border-color:var(--accent);background:var(--accent-soft)}
+.ex .title{font:600 15px var(--display)}
+.stbtns{display:flex;flex-wrap:wrap;gap:6px}
+.stbtns button{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:6px 12px;font:600 13px var(--display);cursor:pointer}
+.stbtns button.on-done{background:var(--accent);border-color:var(--accent);color:#fff}
+.stbtns button.on-partial{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.stbtns button.on-skipped{background:var(--crit-soft);border-color:var(--crit);color:var(--crit)}
+
+.banner{background:var(--warm-soft);border:1px solid color-mix(in srgb,var(--warm) 35%,transparent);border-radius:12px;padding:10px 14px;font-size:14px}
+.empty{color:var(--muted);text-align:center;padding:20px;border:1px dashed var(--line);border-radius:12px}
+
+.media{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mitem{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);display:grid}
+.mitem img,.mitem video{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--bg);display:block}
+.mitem .cap{padding:8px;font-size:12.5px;display:grid;gap:2px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare img,.compare video{width:100%;border-radius:10px;background:var(--bg)}
+video{max-width:100%}
+
+dialog{border:0;border-radius:16px;padding:0;width:min(560px,94vw);max-height:90vh;background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(15,25,30,.45)}
+dialog form{display:grid;gap:12px;padding:18px;overflow:auto;max-height:90vh}
+label.f{display:grid;gap:4px;font-size:13.5px;font-weight:600}
+label.f span.hint{font-weight:400;color:var(--muted);font-size:12.5px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg)}
+textarea{min-height:70px;resize:vertical}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+
+.report > *,.card > *{min-width:0}
+.report{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;gap:18px}
+.report h2{border-bottom:2px solid var(--accent);padding-bottom:6px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 18px;font-size:14.5px}
+.kv div span{color:var(--muted)}
+
+@media print{
+  .top,.noprint{display:none !important}
+  body{background:#fff}
+  main{padding:0}
+  .report{border:0;padding:0}
+}
+@media (prefers-reduced-motion: no-preference){.btn,.tabs button,.seg button{transition:background .15s,color .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-in">
+    <div class="brand"><span class="logo">OT</span><span id="brandName"></span></div>
+    <div class="seg" role="group" id="roleSeg" aria-label="Role"></div>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-ar" data-act="lang" data-v="ar">عربي</button>
+      <button type="button" id="lang-en" data-act="lang" data-v="en">EN</button>
+    </div>
+  </div>
+  <nav class="nav" id="nav"></nav>
+</div>
+<main id="app"></main>
+<dialog id="dlg"><form id="dlgForm" method="dialog"></form></dialog>
+
+<script>
+(function(){
+"use strict";
+/* ================= i18n ================= */
+const T={
+ar:{brand:"منصة العلاج الوظيفي",therapist:"الأخصائي",patient:"المريض",dashboard:"لوحة التحكم",patients:"المرضى",library:"مكتبة التمارين",
+active:"مرضى نشطون",sessionsWeek:"جلسات آخر 7 أيام",dueReassess:"إعادة تقييم قريبة",alertsN:"تنبيهات",needsAttention:"حالات تحتاج مراجعة",nearGoals:"اقتربوا من أهدافهم",
+noAlerts:"لا توجد تنبيهات حاليًا",demoNote:"نسخة تجريبية: البيانات محفوظة على هذا الجهاز فقط. لا تُدخل بيانات مرضى حقيقية قبل ربط المنصة بخادم آمن واستكمال الموافقات.",
+search:"ابحث بالاسم أو الرقم أو التشخيص",all:"الكل",hand:"علاج اليد",peds:"أطفال",neuro:"تأهيل عصبي",newPatient:"مريض جديد",
+adh7:"الالتزام 7 أيام",nextReassess:"إعادة التقييم",discharged:"خرج من الخدمة",activeS:"نشط",
+overview:"الملف",progress:"التحسن",goals:"الأهداف",sessions:"الجلسات",hep:"البرنامج المنزلي",media:"الصور والفيديو",plan:"الخطة والخروج",
+back:"رجوع",id:"الرقم",age:"العمر",specialty:"التخصص",diagnosis:"التشخيص",referral:"سبب الإحالة",history:"التاريخ المرضي",precautions:"الاحتياطات",problems:"المشكلات الوظيفية",caregiver:"ولي الأمر / مقدم الرعاية",start:"بداية العلاج",
+addMeasure:"تسجيل قياسات",addMetric:"إضافة مؤشر",measure:"المؤشر",baseline:"البداية",latest:"آخر قياس",change:"التغير",target:"الهدف",date:"التاريخ",type:"النوع",
+initial:"تقييم أولي",session:"جلسة",reassessment:"إعادة تقييم",higherBetter:"الارتفاع = تحسن",lowerBetter:"الانخفاض = تحسن",unit:"الوحدة",name:"الاسم",
+goalLine:"الهدف",recorded:"القياسات المسجلة",adhVsOutcome:"الالتزام بالبرنامج المنزلي أسبوعيًا للفترة نفسها",
+causalNote:"تزامن الالتزام مع التحسن لا يثبت السببية؛ التعافي الطبيعي والجلسات وشدة الإصابة عوامل مؤثرة.",
+addGoal:"هدف جديد",short:"قصير المدى",long:"طويل المدى",due:"الموعد المتوقع",status:"الحالة",not_started:"لم يبدأ",in_progress:"قيد العمل",achieved:"تحقق",revised:"معدّل",
+goalText:"نص الهدف (SMART)",linkedMeasure:"المؤشر المرتبط",none:"بدون",goalStatusNote:"حالة الهدف يحددها الأخصائي، ولا يعد الهدف محققًا لمجرد الالتزام بالتمارين.",
+addSoap:"ملاحظة SOAP جديدة",S:"ذاتي (Subjective)",O:"موضوعي (Objective)",A:"التقييم (Assessment)",P:"الخطة (Plan)",
+addEx:"إضافة تمرين",dose:"الجرعة",sets:"مجموعات",reps:"تكرارات",perDay:"مرات يوميًا",minutes:"دقائق",remove:"حذف",scheduled:"مجدول",done:"تم",partial:"جزئي",skipped:"لم يتمكن",notLogged:"لم يُسجَّل",
+adherence:"نسبة الالتزام",last14:"آخر 14 يومًا",patientNotes:"ملاحظات المريض",reason:"السبب",pain:"ألم",difficulty:"صعوبة التمرين",time:"عدم توفر الوقت",unclear:"عدم فهم الطريقة",other:"سبب آخر",
+selfReport:"التسجيل تقرير ذاتي من المريض، وليس دليلًا على أداء التمرين بالطريقة الصحيحة.",
+upload:"رفع صورة أو فيديو",label:"الوصف",linkedGoal:"الهدف المرتبط",position:"وضعية المريض",angle:"زاوية التصوير",assist:"مستوى المساعدة",consent:"تم أخذ موافقة المريض أو ولي الأمر على التصوير للتوثيق العلاجي",
+file:"الملف",compare:"مقارنة قبل وبعد",before:"قبل",after:"بعد",noMedia:"لا توجد صور أو فيديوهات بعد. ارفع أول تسجيل من الزر بالأعلى.",
+planHistory:"سجل تعديلات الخطة",addPlanChange:"تسجيل تعديل",changeTxt:"التعديل",why:"السبب",milestones:"الإنجازات الوظيفية",addMilestone:"إضافة إنجاز",
+discharge:"إنهاء العلاج وإصدار تقرير الخروج",dReason:"سبب الخروج",goals_met:"تحقيق الأهداف العلاجية",home_program:"الاستمرار بالبرنامج المنزلي",referred:"التحويل إلى خدمة أخرى",dropout:"انقطاع المريض",
+recs:"التوصيات النهائية",followUp:"موعد المتابعة اللاحقة",viewReport:"عرض تقرير الخروج",print:"طباعة / حفظ PDF",report:"تقرير الخروج",
+sessionsCount:"عدد الجلسات",interventions:"التدخلات / التمارين",save:"حفظ",cancel:"إلغاء",
+exLib:"مكتبة التمارين",attachVideo:"إرفاق فيديو توضيحي",hasVideo:"فيديو مرفق",noVideo:"لا يوجد فيديو",newEx:"تمرين جديد",desc:"التعليمات",area:"المجال",
+choosePatient:"اختر حسابك (تجريبي)",today:"تمارين اليوم",myProgress:"تقدمي",logout:"تبديل الحساب",nothingToday:"لا توجد تمارين مجدولة اليوم.",
+howDid:"كيف كان أداؤك؟",addNote:"أضف ملاحظة",note:"ملاحظة",thisWeek:"هذا الأسبوع",safety:"إذا شعرت بألم شديد أو تنميل جديد أو تورم واضح، أوقف التمارين وتواصل مع العيادة. المنصة ليست وسيلة متابعة طبية فورية.",
+myGoals:"أهدافي",greet:"مرحبًا",exportData:"تصدير نسخة احتياطية",importData:"استيراد نسخة",reset:"إعادة البيانات التجريبية",resetQ:"سيتم حذف كل البيانات على هذا الجهاز واستبدالها بالبيانات التجريبية. متأكد؟",
+confirm:"تأكيد",required:"مطلوب",years:"سنة",sessionNotes:"توثيق الجلسات",noSessions:"لا توجد ملاحظات بعد.",
+lowAdh:"التزام منخفض بالبرنامج المنزلي",skippedN:"تم تجاوز «{x}» {n} مرات",mostly:"غالبًا بسبب",dueOn:"إعادة التقييم مستحقة",plateau:"لا يوجد تغير واضح في «{x}» خلال آخر 3 قياسات",worse:"تراجع في «{x}»",gapDays:"{n} أيام بدون أي تسجيل",
+nearGoal:"قريب من هدف «{x}»",goalsAchieved:"أهداف متحققة",ofGoals:"من",visits:"زيارة",exportNote:"تم تنزيل ملف النسخة الاحتياطية.",importFail:"الملف غير صالح.",
+consentNeeded:"لا يمكن الحفظ بدون تأكيد الموافقة.",fileTooBig:"الملف كبير جدًا (الحد 60 ميغابايت).",mediaFail:"تعذر حفظ الملف على هذا الجهاز.",
+toPatientView:"عرض كما يراه المريض",dischargedOn:"خرج في",reopen:"إعادة فتح الملف",measuresBaseline:"القياسات المرجعية والحالية",
+openFile:"فتح الملف",total:"الإجمالي",week:"أسبوع",reasonsSummary:"أسباب عدم الأداء",partialOf:"جزئي",days:"أيام",daily:"يوميًا"},
+en:{brand:"OT Platform",therapist:"Therapist",patient:"Patient",dashboard:"Dashboard",patients:"Patients",library:"Exercise library",
+active:"Active patients",sessionsWeek:"Sessions, last 7 days",dueReassess:"Reassessments due",alertsN:"Alerts",needsAttention:"Needs attention",nearGoals:"Close to their goals",
+noAlerts:"No alerts right now",demoNote:"Demo version: data is stored on this device only. Do not enter real patient data until the platform runs on a secure server and consents are in place.",
+search:"Search by name, ID or diagnosis",all:"All",hand:"Hand therapy",peds:"Pediatrics",neuro:"Neuro rehab",newPatient:"New patient",
+adh7:"7-day adherence",nextReassess:"Reassessment",discharged:"Discharged",activeS:"Active",
+overview:"File",progress:"Progress",goals:"Goals",sessions:"Sessions",hep:"Home program",media:"Photos & video",plan:"Plan & discharge",
+back:"Back",id:"ID",age:"Age",specialty:"Specialty",diagnosis:"Diagnosis",referral:"Referral reason",history:"Medical history",precautions:"Precautions",problems:"Functional problems",caregiver:"Parent / caregiver",start:"Start of care",
+addMeasure:"Record measurements",addMetric:"Add indicator",measure:"Indicator",baseline:"Baseline",latest:"Latest",change:"Change",target:"Target",date:"Date",type:"Type",
+initial:"Initial assessment",session:"Session",reassessment:"Reassessment",higherBetter:"Higher = better",lowerBetter:"Lower = better",unit:"Unit",name:"Name",
+goalLine:"Goal",recorded:"Recorded values",adhVsOutcome:"Weekly home-program adherence for the same period",
+causalNote:"Adherence rising with improvement does not prove cause; natural recovery, clinic sessions and severity also play a part.",
+addGoal:"New goal",short:"Short-term",long:"Long-term",due:"Expected by",status:"Status",not_started:"Not started",in_progress:"In progress",achieved:"Achieved",revised:"Revised",
+goalText:"Goal text (SMART)",linkedMeasure:"Linked indicator",none:"None",goalStatusNote:"Goal status is set by the therapist; a goal is not met just because exercises were logged.",
+addSoap:"New SOAP note",S:"Subjective",O:"Objective",A:"Assessment",P:"Plan",
+addEx:"Add exercise",dose:"Dose",sets:"Sets",reps:"Reps",perDay:"Times per day",minutes:"Minutes",remove:"Remove",scheduled:"Scheduled",done:"Done",partial:"Partial",skipped:"Skipped",notLogged:"Not logged",
+adherence:"Adherence",last14:"Last 14 days",patientNotes:"Patient notes",reason:"Reason",pain:"Pain",difficulty:"Too difficult",time:"No time",unclear:"Unclear instructions",other:"Other",
+selfReport:"Logging is the patient's self-report, not proof the exercise was done correctly.",
+upload:"Upload photo or video",label:"Description",linkedGoal:"Linked goal",position:"Patient position",angle:"Camera angle",assist:"Assistance level",consent:"Patient or guardian consent for clinical documentation has been obtained",
+file:"File",compare:"Before & after",before:"Before",after:"After",noMedia:"No photos or videos yet. Upload the first one with the button above.",
+planHistory:"Plan change history",addPlanChange:"Log a change",changeTxt:"Change",why:"Reason",milestones:"Functional milestones",addMilestone:"Add milestone",
+discharge:"End care and issue discharge summary",dReason:"Discharge reason",goals_met:"Treatment goals met",home_program:"Continue with home program",referred:"Referred to another service",dropout:"Patient dropped out",
+recs:"Final recommendations",followUp:"Follow-up date",viewReport:"View discharge summary",print:"Print / save PDF",report:"Discharge summary",
+sessionsCount:"Sessions",interventions:"Interventions / exercises",save:"Save",cancel:"Cancel",
+exLib:"Exercise library",attachVideo:"Attach demo video",hasVideo:"Video attached",noVideo:"No video",newEx:"New exercise",desc:"Instructions",area:"Area",
+choosePatient:"Choose your account (demo)",today:"Today's exercises",myProgress:"My progress",logout:"Switch account",nothingToday:"No exercises scheduled today.",
+howDid:"How did it go?",addNote:"Add a note",note:"Note",thisWeek:"This week",safety:"If you feel severe pain, new numbness or clear swelling, stop the exercises and contact the clinic. This platform is not real-time medical monitoring.",
+myGoals:"My goals",greet:"Hello",exportData:"Export backup",importData:"Import backup",reset:"Reset demo data",resetQ:"All data on this device will be deleted and replaced with demo data. Continue?",
+confirm:"Confirm",required:"Required",years:"yrs",sessionNotes:"Session notes",noSessions:"No notes yet.",
+lowAdh:"Low home-program adherence",skippedN:"“{x}” skipped {n} times",mostly:"mostly due to",dueOn:"Reassessment due",plateau:"No clear change in “{x}” over the last 3 measurements",worse:"Worsening in “{x}”",gapDays:"{n} days with nothing logged",
+nearGoal:"Close to goal: “{x}”",goalsAchieved:"Goals achieved",ofGoals:"of",visits:"visits",exportNote:"Backup file downloaded.",importFail:"That file is not a valid backup.",
+consentNeeded:"Cannot save without confirming consent.",fileTooBig:"File too large (limit 60 MB).",mediaFail:"Could not save the file on this device.",
+toPatientView:"See it as the patient does",dischargedOn:"Discharged on",reopen:"Reopen file",measuresBaseline:"Baseline and current measurements",
+openFile:"Open file",total:"Total",week:"Week",reasonsSummary:"Reasons for not doing",partialOf:"partial",days:"days",daily:"daily"}
+};
+let lang="ar";
+try{const l=localStorage.getItem("otp-lang");if(l==="en"||l==="ar")lang=l;}catch(e){}
+const t=(k,vars)=>{let s=(T[lang][k]??T.en[k]??k);if(vars)for(const v in vars)s=s.replace("{"+v+"}",vars[v]);return s;};
+const L=v=>(v&&typeof v==="object")?(v[lang]||v.ar||v.en||""):(v==null?"":String(v));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const H=v=>esc(L(v));
+
+/* ================= dates ================= */
+const iso=d=>{const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+dd;};
+const parse=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const TODAY=iso(new Date());
+const dayDiff=(a,b)=>Math.round((parse(b)-parse(a))/86400000);
+const fmt=s=>{if(!s)return"—";try{return parse(s).toLocaleDateString(lang==="ar"?"ar-SA-u-nu-latn-ca-gregory":"en-GB",{day:"numeric",month:"short",year:"numeric"});}catch(e){return s;}};
+const fmtShort=s=>{try{return parse(s).toLocaleDateString(lang==="ar"?"ar-SA-u-nu-latn-ca-gregory":"en-GB",{day:"numeric",month:"short"});}catch(e){return s;}};
+const wd=s=>parse(s).toLocaleDateString(lang==="ar"?"ar-SA-u-nu-latn":"en-GB",{weekday:"short"});
+const uid=p=>(p||"x")+Math.random().toString(36).slice(2,9);
+
+/* ================= measures templates ================= */
+const MT={
+ ext:{name:{ar:"مد الرسغ",en:"Wrist extension"},unit:"°",up:true,floor:0},
+ flex:{name:{ar:"ثني الرسغ",en:"Wrist flexion"},unit:"°",up:true,floor:0},
+ grip:{name:{ar:"قوة القبضة",en:"Grip strength"},unit:"kg",up:true,floor:0},
+ pinch:{name:{ar:"قوة القرص",en:"Pinch strength"},unit:"kg",up:true,floor:0},
+ pain:{name:{ar:"شدة الألم",en:"Pain"},unit:"/10",up:false,floor:0,ceil:10},
+ qd:{name:{ar:"QuickDASH",en:"QuickDASH"},unit:"/100",up:false,floor:0,ceil:100},
+ btn:{name:{ar:"زمن إقفال 5 أزرار",en:"Time to fasten 5 buttons"},unit:"s",up:false,floor:0},
+ dress:{name:{ar:"الاستقلالية في لبس الملابس",en:"Dressing independence"},unit:"/5",up:true,floor:1,ceil:5},
+ gas:{name:{ar:"GAS: مسكة القلم",en:"GAS: pencil grasp"},unit:"",up:true,floor:-2,ceil:2},
+ copm:{name:{ar:"COPM الأداء",en:"COPM performance"},unit:"/10",up:true,floor:1,ceil:10},
+ bbt:{name:{ar:"Box & Block (اليمنى)",en:"Box & Block (right)"},unit:"/min",up:true,floor:0},
+ feed:{name:{ar:"الاستقلالية في الأكل",en:"Feeding independence"},unit:"/5",up:true,floor:1,ceil:5}
+};
+const SPEC_TPL={hand:["ext","flex","grip","pain","qd"],peds:["btn","dress","gas","copm"],neuro:["bbt","feed","pain","copm"]};
+const mkMeasure=k=>Object.assign({id:k},JSON.parse(JSON.stringify(MT[k])));
+
+/* ================= seed ================= */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function seed(){
+ const D=n=>iso(addDays(new Date(),-n));
+ const lib=[
+  {id:"e1",area:"hand",name:{ar:"ثني ومد الرسغ النشط",en:"Active wrist flexion/extension"},desc:{ar:"ساعد على الطاولة، حرك الرسغ للأعلى والأسفل ببطء بدون ألم حاد.",en:"Forearm on table, move the wrist up and down slowly, without sharp pain."},dose:{sets:3,reps:10,perDay:2}},
+  {id:"e2",area:"hand",name:{ar:"انزلاق الأوتار",en:"Tendon gliding"},desc:{ar:"خمس وضعيات للأصابع بالترتيب، ثبّت كل وضعية 5 ثوان.",en:"Five finger positions in order, hold each for 5 seconds."},dose:{sets:2,reps:10,perDay:3}},
+  {id:"e3",area:"hand",name:{ar:"تقوية القبضة بالمعجون",en:"Putty grip strengthening"},desc:{ar:"اضغط المعجون بكامل اليد ثم أرخِ.",en:"Squeeze the putty with the whole hand, then relax."},dose:{sets:3,reps:10,perDay:1}},
+  {id:"e4",area:"hand",name:{ar:"لف الساعد (كب وبطح)",en:"Forearm pronation/supination"},desc:{ar:"المرفق ملاصق للجسم، اقلب الكف للأعلى ثم للأسفل.",en:"Elbow at your side, turn the palm up then down."},dose:{sets:2,reps:15,perDay:2}},
+  {id:"e5",area:"hand",name:{ar:"انزلاق العصب المتوسط",en:"Median nerve gliding"},desc:{ar:"سلسلة حركات لطيفة كما تعلمتها في الجلسة، بدون تنميل.",en:"Gentle sequence as taught in session; stop if tingling increases."},dose:{sets:1,reps:5,perDay:3}},
+  {id:"e11",area:"hand",name:{ar:"تدليك الندبة",en:"Scar massage"},desc:{ar:"دوائر صغيرة بضغط متوسط على الندبة بعد التئام الجرح.",en:"Small circles with medium pressure once the wound has healed."},dose:{minutes:5,perDay:2}},
+  {id:"e6",area:"peds",name:{ar:"لوح الأزرار",en:"Button board practice"},desc:{ar:"إقفال وفتح الأزرار الكبيرة ثم الصغيرة مع ولي الأمر.",en:"Fasten and unfasten large then small buttons with a parent."},dose:{minutes:5,perDay:1}},
+  {id:"e7",area:"peds",name:{ar:"لوح الأوتاد",en:"Pegboard"},desc:{ar:"التقاط الأوتاد بالإبهام والسبابة ووضعها في الثقوب.",en:"Pick pegs with thumb and index finger and place them in holes."},dose:{minutes:10,perDay:1}},
+  {id:"e13",area:"peds",name:{ar:"الرسم على سطح مائل",en:"Drawing on a slanted surface"},desc:{ar:"رسم أشكال بسيطة مع مسكة القلم الصحيحة.",en:"Draw simple shapes using the correct pencil grasp."},dose:{minutes:10,perDay:1}},
+  {id:"e9",area:"neuro",name:{ar:"انزلاق اليد على الطاولة",en:"Table slides"},desc:{ar:"ضع اليد على منشفة وحركها للأمام والجانب.",en:"Hand on a towel, slide forward and to the side."},dose:{sets:2,reps:10,perDay:2}},
+  {id:"e10",area:"neuro",name:{ar:"إيصال الكوب إلى الفم",en:"Cup-to-mouth task"},desc:{ar:"كوب فارغ خفيف، ارفعه إلى الفم ببطء ثم أعده.",en:"Light empty cup, bring it to the mouth slowly and back."},dose:{sets:2,reps:8,perDay:2}},
+  {id:"e12",area:"neuro",name:{ar:"عصر الكرة بالكفين",en:"Bilateral ball squeeze"},desc:{ar:"كرة طرية بين الكفين، اضغط 5 ثوان ثم أرخِ.",en:"Soft ball between both palms, squeeze 5 s then relax."},dose:{sets:2,reps:10,perDay:2}}
+ ];
+ const rec=(m,arr)=>arr.map(([n,v,type])=>({id:uid("r"),m,date:D(n),v,type:type||"session"}));
+ const P=[];
+ // 1 hand
+ P.push({id:"OT-0001",name:{ar:"سارة العتيبي",en:"Sarah Alotaibi"},age:34,sex:"F",spec:"hand",status:"active",start:D(35),nextReassess:D(-6),
+  diagnosis:{ar:"كسر الطرف السفلي للكعبرة (Distal Radius) - اليد اليمنى، بعد إزالة الجبيرة",en:"Right distal radius fracture, after cast removal"},
+  referral:{ar:"محدودية حركة الرسغ وضعف القبضة",en:"Limited wrist motion and weak grip"},history:{ar:"سقوط على اليد الممدودة قبل 7 أسابيع، علاج تحفظي بالجبيرة",en:"Fall on outstretched hand 7 weeks ago, treated conservatively in a cast"},
+  precautions:{ar:"تجنب حمل أكثر من 2 كغ حتى يسمح الطبيب",en:"No lifting over 2 kg until cleared by the physician"},problems:{ar:"صعوبة في الطبخ، الكتابة، فتح العلب، ولبس الإسوارة",en:"Difficulty cooking, writing, opening jars and fastening a bracelet"},caregiver:"",
+  measures:["ext","flex","grip","pain","qd"].map(mkMeasure),
+  records:[].concat(rec("ext",[[35,20,"initial"],[28,28],[21,35],[14,43],[7,52,"reassessment"],[0,60]]),rec("flex",[[35,25,"initial"],[21,38],[7,50,"reassessment"],[0,55]]),rec("grip",[[35,8,"initial"],[28,10],[21,13],[14,15],[7,18,"reassessment"],[0,21]]),rec("pain",[[35,7,"initial"],[28,6],[21,5],[14,4],[7,3,"reassessment"],[0,2]]),rec("qd",[[35,68,"initial"],[21,50],[7,34,"reassessment"]])),
+  goals:[{id:"g1",term:"short",text:{ar:"زيادة مد الرسغ إلى 65° خلال 6 أسابيع لتمكين الاستناد على اليد",en:"Increase wrist extension to 65° within 6 weeks to allow weight bearing"},m:"ext",target:65,due:D(-7),status:"in_progress"},
+   {id:"g2",term:"long",text:{ar:"قوة قبضة 25 كغ لحمل أدوات المطبخ",en:"Grip strength 25 kg to handle kitchen utensils"},m:"grip",target:25,due:D(-21),status:"in_progress"},
+   {id:"g3",term:"long",text:{ar:"QuickDASH أقل من 20",en:"QuickDASH below 20"},m:"qd",target:20,due:D(-21),status:"in_progress"},
+   {id:"g4",term:"short",text:{ar:"تحضير وجبة بسيطة باستخدام اليدين بألم لا يتجاوز 3/10",en:"Prepare a simple meal with both hands, pain no higher than 3/10"},m:"",target:null,due:D(-10),status:"in_progress"}],
+  sessions:[{id:uid("s"),date:D(7),s:{ar:"تقول المريضة إن الألم أقل صباحًا، وتستطيع الكتابة لمدة 10 دقائق.",en:"Reports less morning pain; can write for 10 minutes."},o:{ar:"مد الرسغ 52°، ثني 50°، القبضة 18 كغ. تورم خفيف.",en:"Extension 52°, flexion 50°, grip 18 kg. Mild swelling."},a:{ar:"تحسن مستمر في المدى والقوة، الالتزام بالبرنامج المنزلي جيد.",en:"Steady gains in range and strength; good home-program adherence."},p:{ar:"زيادة مقاومة المعجون، إضافة تمارين لف الساعد.",en:"Progress putty resistance, add forearm rotation."}},
+   {id:uid("s"),date:D(0),s:{ar:"فتحت علبة بيديها هذا الأسبوع.",en:"Opened a jar with both hands this week."},o:{ar:"مد 60°، القبضة 21 كغ، الألم 2/10.",en:"Extension 60°, grip 21 kg, pain 2/10."},a:{ar:"قريبة من هدف مد الرسغ.",en:"Close to the wrist extension goal."},p:{ar:"إعادة تقييم بعد أسبوع، البدء بمهام المطبخ الخفيفة.",en:"Reassess in one week; start light kitchen tasks."}}],
+  hep:[{id:"h1",ex:"e1",sets:3,reps:10,perDay:2,from:D(35)},{id:"h2",ex:"e2",sets:2,reps:10,perDay:3,from:D(35)},{id:"h3",ex:"e3",sets:3,reps:10,perDay:1,from:D(21)}],
+  logs:[],notes:[{date:D(3),text:{ar:"شعرت بشد خفيف بعد تمرين المعجون",en:"Felt mild tightness after the putty exercise"}}],media:[],
+  plan:[{date:D(35),change:{ar:"الخطة الأولية: تمارين مدى حركة نشطة، انزلاق الأوتار، تثقيف عن الوذمة",en:"Initial plan: active ROM, tendon gliding, edema education"},why:{ar:"بعد التقييم الأولي",en:"After initial assessment"}},{date:D(21),change:{ar:"إضافة تقوية القبضة بالمعجون",en:"Added putty grip strengthening"},why:{ar:"تأكيد التئام الكسر من الطبيب",en:"Physician confirmed fracture union"}}],
+  milestones:[{date:D(14),text:{ar:"العودة إلى كتابة ملاحظات قصيرة",en:"Back to writing short notes"}},{date:D(5),text:{ar:"فتح علبة باستخدام اليدين",en:"Opened a jar using both hands"}}],discharge:null});
+ // 2 peds
+ P.push({id:"OT-0002",name:{ar:"يوسف الحربي",en:"Yousef Alharbi"},age:6,sex:"M",spec:"peds",status:"active",start:D(42),nextReassess:D(-1),
+  diagnosis:{ar:"اضطراب التناسق الحركي النمائي (DCD)",en:"Developmental coordination disorder (DCD)"},referral:{ar:"صعوبة في اللبس والمهارات الحركية الدقيقة في المدرسة",en:"Difficulty dressing and with fine motor tasks at school"},history:{ar:"تأخر بسيط في المهارات الحركية، لا توجد مشاكل طبية أخرى",en:"Mild motor delay, no other medical issues"},
+  precautions:{ar:"لا يوجد",en:"None"},problems:{ar:"إقفال الأزرار، مسكة القلم، لبس الملابس العلوية",en:"Fastening buttons, pencil grasp, putting on upper-body clothing"},caregiver:{ar:"والدته: أم يوسف",en:"Mother"},
+  measures:["btn","dress","gas","copm"].map(mkMeasure),
+  records:[].concat(rec("btn",[[42,180,"initial"],[35,165],[28,150],[21,130],[14,105,"reassessment"]]),rec("dress",[[42,2,"initial"],[28,3],[14,4,"reassessment"]]),rec("gas",[[42,-2,"initial"],[28,-1],[14,0,"reassessment"]]),rec("copm",[[42,3,"initial"],[14,6,"reassessment"]])),
+  goals:[{id:"g1",term:"short",text:{ar:"يلبس قميصه العلوي بإشراف فقط (مستوى 4) خلال 6 أسابيع",en:"Puts on upper-body shirt with supervision only (level 4) within 6 weeks"},m:"dress",target:4,due:D(0),status:"in_progress"},
+   {id:"g2",term:"short",text:{ar:"يقفل 5 أزرار خلال أقل من 90 ثانية",en:"Fastens 5 buttons in under 90 seconds"},m:"btn",target:90,due:D(-14),status:"in_progress"},
+   {id:"g3",term:"long",text:{ar:"مسكة قلم ثلاثية ثابتة أثناء الكتابة (GAS +1)",en:"Stable tripod grasp while writing (GAS +1)"},m:"gas",target:1,due:D(-30),status:"in_progress"}],
+  sessions:[{id:uid("s"),date:D(14),s:{ar:"تقول الأم إنه أصبح يحاول اللبس وحده كل صباح.",en:"Mother says he now tries to dress himself every morning."},o:{ar:"إقفال 5 أزرار في 105 ثوان، اللبس بإشراف ومساعدة بسيطة.",en:"5 buttons in 105 s; dresses with supervision and light help."},a:{ar:"تحسن واضح، المشاركة جيدة.",en:"Clear improvement, good engagement."},p:{ar:"زيادة صعوبة الأزرار، نشاط الرسم على سطح مائل.",en:"Smaller buttons; slanted-surface drawing."}}],
+  hep:[{id:"h1",ex:"e6",minutes:5,perDay:1,from:D(42)},{id:"h2",ex:"e7",minutes:10,perDay:1,from:D(42)},{id:"h3",ex:"e13",minutes:10,perDay:1,from:D(14)}],
+  logs:[],notes:[{date:D(2),text:{ar:"(ولي الأمر) كان متعبًا بعد المدرسة، أكملنا نصف المدة",en:"(Parent) He was tired after school; we did half the time"}}],media:[],
+  plan:[{date:D(42),change:{ar:"الخطة الأولية: مهارات حركية دقيقة، تدريب على اللبس",en:"Initial plan: fine motor skills, dressing practice"},why:{ar:"بعد التقييم الأولي",en:"After initial assessment"}},{date:D(14),change:{ar:"إضافة الرسم على سطح مائل",en:"Added slanted-surface drawing"},why:{ar:"تحسن الأزرار، التركيز على مسكة القلم",en:"Buttons improving; focus on pencil grasp"}}],
+  milestones:[{date:D(20),text:{ar:"لبس القميص بمساعدة بسيطة لأول مرة",en:"Put on his shirt with minimal help for the first time"}}],discharge:null});
+ // 3 neuro
+ P.push({id:"OT-0003",name:{ar:"عبدالله القحطاني",en:"Abdullah Alqahtani"},age:58,sex:"M",spec:"neuro",status:"active",start:D(49),nextReassess:D(-10),
+  diagnosis:{ar:"جلطة دماغية (الشريان الدماغي الأوسط الأيسر) مع ضعف الطرف العلوي الأيمن",en:"Left MCA stroke with right upper-limb weakness"},referral:{ar:"تحسين استخدام اليد اليمنى في الأكل والعناية الشخصية",en:"Improve right-hand use for eating and self-care"},history:{ar:"ارتفاع ضغط، سكري نوع 2",en:"Hypertension, type 2 diabetes"},
+  precautions:{ar:"ألم الكتف الأيمن، تجنب سحب الذراع",en:"Right shoulder pain; avoid pulling on the arm"},problems:{ar:"الأكل بالملعقة، تزرير الثوب، الإمساك بالكوب",en:"Eating with a spoon, buttoning, holding a cup"},caregiver:{ar:"ابنه: محمد",en:"Son: Mohammed"},
+  measures:["bbt","feed","pain","copm"].map(mkMeasure),
+  records:[].concat(rec("bbt",[[49,9,"initial"],[42,11],[35,12],[28,13],[21,13],[14,13,"reassessment"],[7,14]]),rec("feed",[[49,2,"initial"],[35,3],[14,3,"reassessment"]]),rec("pain",[[49,3,"initial"],[35,3],[21,4],[7,5]]),rec("copm",[[49,3,"initial"],[14,4,"reassessment"]])),
+  goals:[{id:"g1",term:"long",text:{ar:"Box & Block باليد اليمنى 20 مكعبًا/دقيقة",en:"Right-hand Box & Block 20 blocks/min"},m:"bbt",target:20,due:D(-30),status:"in_progress"},
+   {id:"g2",term:"short",text:{ar:"الأكل باستقلالية باستخدام ملعقة معدلة (مستوى 5)",en:"Eat independently with an adapted spoon (level 5)"},m:"feed",target:5,due:D(-14),status:"in_progress"}],
+  sessions:[{id:uid("s"),date:D(7),s:{ar:"يقول إن تمرين الكوب يسبب ألمًا في الكتف.",en:"Says the cup task causes shoulder pain."},o:{ar:"BBT 14، ألم الكتف 5/10 مع الرفع فوق 90°.",en:"BBT 14, shoulder pain 5/10 above 90° elevation."},a:{ar:"استقرار في الأداء الحركي وزيادة الألم، يحتاج مراجعة البرنامج.",en:"Motor performance plateauing with rising pain; program needs review."},p:{ar:"مراجعة وضعية تمرين الكوب، تثقيف الأسرة.",en:"Review cup-task positioning; family education."}}],
+  hep:[{id:"h1",ex:"e9",sets:2,reps:10,perDay:2,from:D(49)},{id:"h2",ex:"e10",sets:2,reps:8,perDay:2,from:D(35)},{id:"h3",ex:"e12",sets:2,reps:10,perDay:2,from:D(49)}],
+  logs:[],notes:[{date:D(4),text:{ar:"الكتف يؤلمني مع تمرين الكوب",en:"My shoulder hurts with the cup exercise"}},{date:D(1),text:{ar:"(ابنه) لم يتمكن من التمارين بسبب موعد طبي",en:"(Son) Could not exercise due to a medical appointment"}}],media:[],
+  plan:[{date:D(49),change:{ar:"الخطة الأولية: تدريب المهام، تمارين الطرف العلوي",en:"Initial plan: task-oriented training, upper-limb exercises"},why:{ar:"بعد التقييم الأولي",en:"After initial assessment"}}],
+  milestones:[],discharge:null});
+ // 4 hand new
+ P.push({id:"OT-0004",name:{ar:"نورة الشمري",en:"Noura Alshammari"},age:41,sex:"F",spec:"hand",status:"active",start:D(10),nextReassess:D(-2),
+  diagnosis:{ar:"ما بعد عملية تحرير النفق الرسغي - اليد اليمنى",en:"After right carpal tunnel release"},referral:{ar:"ضعف القبضة وألم الندبة",en:"Weak grip and scar pain"},history:{ar:"عملية قبل 3 أسابيع",en:"Surgery 3 weeks ago"},
+  precautions:{ar:"تجنب الضغط المباشر على الندبة",en:"Avoid direct pressure on the scar"},problems:{ar:"صعوبة في حمل الأكياس واستخدام الجوال لفترة طويلة",en:"Difficulty carrying bags and using the phone for long"},caregiver:"",
+  measures:["grip","pinch","pain","qd"].map(mkMeasure),
+  records:[].concat(rec("grip",[[10,12,"initial"]]),rec("pinch",[[10,3,"initial"]]),rec("pain",[[10,5,"initial"]]),rec("qd",[[10,52,"initial"]])),
+  goals:[{id:"g1",term:"short",text:{ar:"قوة قبضة 20 كغ لحمل أكياس التسوق",en:"Grip 20 kg to carry shopping bags"},m:"grip",target:20,due:D(-28),status:"not_started"}],
+  sessions:[],hep:[{id:"h1",ex:"e5",sets:1,reps:5,perDay:3,from:D(10)},{id:"h2",ex:"e11",minutes:5,perDay:2,from:D(10)}],
+  logs:[],notes:[],media:[],plan:[{date:D(10),change:{ar:"الخطة الأولية: انزلاق العصب، تدليك الندبة",en:"Initial plan: nerve gliding, scar massage"},why:{ar:"بعد التقييم الأولي",en:"After initial assessment"}}],milestones:[],discharge:null});
+
+ const prof={"OT-0001":[.88,{}],"OT-0002":[.78,{}],"OT-0003":[.42,{h2:.15}],"OT-0004":[.9,{}]};
+ P.forEach((p,pi)=>{
+  const r=rng(1000+pi*77);const [base,over]=prof[p.id];
+  const span=dayDiff(p.start,TODAY);
+  for(let n=span-1;n>=1;n--){
+   const date=D(n);const gap=r()<(p.id==="OT-0003"?.2:.06);
+   p.hep.forEach(h=>{
+    if(date<h.from||gap)return;
+    const pr=over[h.id]!=null?over[h.id]:base;const x=r();
+    let st=null,reason="";
+    if(x<pr)st="done";else{const y=r();if(y<.4)st="partial";else if(y<.8)st="skipped";else st=null;
+     if(st){reason=(p.id==="OT-0003"&&h.id==="h2")?"pain":["time","difficulty","pain","time"][Math.floor(r()*4)];}}
+    if(st)p.logs.push({date,h:h.id,st,reason,note:""});
+   });
+  }
+ });
+ return {v:1,patients:P,lib,seq:4};
+}
+
+/* ================= storage ================= */
+const KEY="otp-data-v1";
+let S;
+function load(){try{const s=localStorage.getItem(KEY);if(s){S=JSON.parse(s);if(S&&S.patients)return;}}catch(e){}S=seed();save();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast(t("mediaFail"));}}
+// media in IndexedDB
+let dbp=null;
+function db(){if(dbp)return dbp;dbp=new Promise((res,rej)=>{try{const r=indexedDB.open("otp-media",1);r.onupgradeneeded=()=>r.result.createObjectStore("m");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});return dbp;}
+async function mput(id,blob){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction("m","readwrite");tx.objectStore("m").put(blob,id);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+async function mget(id){const d=await db();return new Promise((res)=>{const tx=d.transaction("m","readonly");const q=tx.objectStore("m").get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);});}
+async function mdel(id){try{const d=await db();d.transaction("m","readwrite").objectStore("m").delete(id);}catch(e){}}
+const urlCache={};
+async function hydrate(){
+ const els=document.querySelectorAll("[data-media]");
+ for(const el of els){const id=el.dataset.media;try{
+  if(!urlCache[id]){const b=await mget(id);if(!b){el.closest(".mwrap")&&(el.closest(".mwrap").hidden=true);continue;}urlCache[id]={u:URL.createObjectURL(b),k:b.type};}
+  const c=urlCache[id];const isV=c.k.startsWith("video");
+  if(isV&&el.tagName!=="VIDEO"){const v=document.createElement("video");v.controls=true;v.playsInline=true;v.src=c.u;v.className=el.className;v.dataset.media=id;el.replaceWith(v);}
+  else{el.src=c.u;}
+  el.closest(".mwrap")&&(el.closest(".mwrap").hidden=false);
+ }catch(e){}}
+}
+
+/* ================= helpers ================= */
+const P=id=>S.patients.find(p=>p.id===id);
+const ex=id=>S.lib.find(e=>e.id===id)||{name:{ar:"تمرين",en:"Exercise"},desc:"",dose:{}};
+const meas=(p,mid)=>p.measures.find(m=>m.id===mid);
+const series=(p,mid)=>p.records.filter(r=>r.m===mid).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+const first=(p,mid)=>series(p,mid)[0];
+const last=(p,mid)=>{const s=series(p,mid);return s[s.length-1];};
+const sign=n=>`<bdi dir="ltr">${n>0?"+":""}${n}</bdi>`;
+function chg(p,mid){const m=meas(p,mid),a=first(p,mid),b=last(p,mid);if(!a||!b||a===b)return null;const d=+(b.v-a.v).toFixed(1);return {d,good:m.up?d>0:d<0,bad:m.up?d<0:d>0};}
+function goalPct(p,g){if(!g.m)return null;const a=first(p,g.m),b=last(p,g.m);if(!a||!b||g.target==null)return null;const span=g.target-a.v;if(span===0)return 1;return Math.max(0,Math.min(1,(b.v-a.v)/span));}
+function hepDose(h){const parts=[];if(h.sets)parts.push(h.sets+" × "+h.reps);if(h.minutes)parts.push(h.minutes+" "+t("minutes"));if(h.perDay)parts.push(h.perDay+" × "+(lang==="ar"?"يوميًا":"/day"));return parts.join(" · ");}
+function adh(p,days,end){end=end||addDays(parse(TODAY),-1);let sch=0,d=0,pa=0,sk=0,nl=0;const gaps=[];
+ for(let i=days-1;i>=0;i--){const date=iso(addDays(end,-i));if(date<p.start)continue;let any=false,sday=0;
+  p.hep.forEach(h=>{if(date<h.from)return;sch++;sday++;const l=p.logs.find(x=>x.date===date&&x.h===h.id);if(!l)nl++;else{any=true;if(l.st==="done")d++;else if(l.st==="partial")pa++;else sk++;}});
+  if(sday&&!any)gaps.push(date);}
+ return {sch,d,pa,sk,nl,pct:sch?Math.round(d/sch*100):null,gaps};}
+function alerts(p){const out=[];if(p.status!=="active")return out;
+ const a=adh(p,7);
+ if(a.pct!=null&&a.pct<60)out.push({lv:"crit",tx:t("lowAdh")+": "+a.pct+"%"});
+ if(a.gaps.length>=3)out.push({lv:"warn",tx:t("gapDays",{n:a.gaps.length})});
+ const since=iso(addDays(parse(TODAY),-7));
+ p.hep.forEach(h=>{const sk=p.logs.filter(l=>l.h===h.id&&l.date>=since&&l.st==="skipped");if(sk.length>=3){const rc={};sk.forEach(l=>rc[l.reason]=(rc[l.reason]||0)+1);const top=Object.keys(rc).sort((x,y)=>rc[y]-rc[x])[0];out.push({lv:"warn",tx:t("skippedN",{x:L(ex(h.ex).name),n:sk.length})+(top?" ("+t("mostly")+" "+t(top)+")":"")});}});
+ if(p.nextReassess&&dayDiff(TODAY,p.nextReassess)<=3)out.push({lv:"info",tx:t("dueOn")+": "+fmt(p.nextReassess)});
+ p.measures.forEach(m=>{const s=series(p,m.id);if(s.length>=3){const l3=s.slice(-3);const range=Math.abs((m.ceil!=null?m.ceil:Math.max(...s.map(x=>x.v),1))-(m.floor||0))||1;const d=l3[2].v-l3[0].v;const good=m.up?d:-d;
+  if(good<0&&Math.abs(d)>=range*.05)out.push({lv:"warn",tx:t("worse",{x:L(m.name)})+" ("+l3[0].v+" → "+l3[2].v+")"});
+  else if(Math.abs(d)<range*.06&&m.id===p.measures[0].id)out.push({lv:"warn",tx:t("plateau",{x:L(m.name)})});}});
+ return out;}
+function nearGoals(p){return p.goals.filter(g=>g.status!=="achieved"&&g.m).filter(g=>{const x=goalPct(p,g);return x!=null&&x>=.8;});}
+
+/* ================= charts ================= */
+function lineChart(p,mid,opts){opts=opts||{};const m=meas(p,mid);const s=series(p,mid);if(!s.length)return `<div class="empty">—</div>`;
+ const g=p.goals.find(x=>x.m===mid&&x.target!=null);const W=440,Hh=230,l=40,r=14,tp=24,b=36;
+ const vals=s.map(x=>x.v).concat(g?[g.target]:[]);let lo=Math.min(...vals),hi=Math.max(...vals);const span=(hi-lo)||Math.max(1,Math.abs(hi)*.2);lo-=span*.18;hi+=span*.18;
+ if(m.floor!=null)lo=Math.max(lo,m.floor);if(m.ceil!=null)hi=Math.min(hi,m.ceil);if(hi===lo)hi=lo+1;
+ const X=i=>s.length===1?(l+(W-l-r)/2):l+i*(W-l-r)/(s.length-1);const Y=v=>tp+(Hh-tp-b)*(1-(v-lo)/(hi-lo));
+ let grid="",ylab="";for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4;const y=Y(v);grid+=`<line x1="${l}" x2="${W-r}" y1="${y}" y2="${y}" stroke="var(--line)"/>`;ylab+=`<text x="${l-8}" y="${y+4}" text-anchor="end">${(Math.abs(hi-lo)<8?v.toFixed(1):Math.round(v))}</text>`;}
+ const pts=s.map((x,i)=>[X(i),Y(x.v)]);const path=pts.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)).join(" ");
+ const area=s.length>1?`<path d="${path} L${pts[pts.length-1][0]} ${Hh-b} L${pts[0][0]} ${Hh-b} Z" fill="var(--accent)" opacity=".1"/>`:"";
+ const gl=g?`<line x1="${l}" x2="${W-r}" y1="${Y(g.target)}" y2="${Y(g.target)}" stroke="var(--warm)" stroke-width="2" stroke-dasharray="6 5"/><text x="${l+4}" y="${Y(g.target)-6}" text-anchor="start" fill="var(--warm)">${esc(t("goalLine"))} ${g.target}${esc(m.unit)}</text>`:"";
+ const dots=pts.map((q,i)=>`<circle cx="${q[0]}" cy="${q[1]}" r="${i===pts.length-1?6:4.5}" fill="${i===pts.length-1?"var(--accent)":"var(--surface)"}" stroke="var(--accent)" stroke-width="2.5"/><text x="${q[0]}" y="${q[1]-11}" text-anchor="middle" fill="var(--ink)" font-weight="600">${s[i].v}</text>`).join("");
+ const step=Math.ceil(s.length/5);const xl=s.map((x,i)=>i%step===0||i===s.length-1?`<text x="${X(i)}" y="${Hh-b+20}" text-anchor="${s.length>1&&i===0?"start":s.length>1&&i===s.length-1?"end":"middle"}">${esc(fmtShort(x.date))}</text>`:"").join("");
+ return `<div class="chart" dir="ltr"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${H(m.name)}" font-family="Readex Pro, sans-serif" font-size="12" fill="var(--muted)">${grid}${ylab}${gl}${area}<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>${dots}${xl}</svg></div>`;}
+function weeklyAdh(p){const weeks=[];const startD=parse(p.start);const tot=dayDiff(p.start,TODAY);const nW=Math.max(1,Math.ceil(tot/7));
+ for(let w=0;w<nW;w++){const end=addDays(startD,Math.min(w*7+6,tot-1));const a=adh(p,7,end);weeks.push({w:w+1,pct:a.pct});}
+ const W=440,Hh=170,l=40,r=12,tp=18,b=30;const bw=(W-l-r)/weeks.length;
+ let g="";[0,50,100].forEach(v=>{const y=tp+(Hh-tp-b)*(1-v/100);g+=`<line x1="${l}" x2="${W-r}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${l-6}" y="${y+4}" text-anchor="end">${v}%</text>`;});
+ const bars=weeks.map((x,i)=>{const v=x.pct||0;const h=(Hh-tp-b)*v/100;const xx=l+i*bw+bw*.2;const col=v<60?"var(--crit)":v<80?"var(--warn)":"var(--accent)";return `<rect x="${xx}" y="${Hh-b-h}" width="${bw*.6}" height="${h}" rx="4" fill="${col}" opacity=".85"/><text x="${xx+bw*.3}" y="${Hh-b-h-5}" text-anchor="middle" fill="var(--ink)" font-weight="600">${x.pct==null?"–":v+"%"}</text><text x="${xx+bw*.3}" y="${Hh-b+18}" text-anchor="middle">${esc(lang==="ar"?"أ"+x.w:"W"+x.w)}</text>`;}).join("");
+ return `<div class="chart" dir="ltr"><svg viewBox="0 0 ${W} ${Hh}" font-family="Readex Pro, sans-serif" font-size="12" fill="var(--muted)">${g}${bars}</svg></div>`;}
+function weekStrip(p,days){days=days||7;let h="";for(let i=days-1;i>=0;i--){const date=iso(addDays(parse(TODAY),-i));let sch=0,d=0,pa=0;p.hep.forEach(x=>{if(date<x.from||date<p.start)return;sch++;const l=p.logs.find(y=>y.date===date&&y.h===x.id);if(l){if(l.st==="done")d++;else if(l.st==="partial")pa++;}});
+ const cls=!sch?"":d===sch?"full":(d+pa)>0?"part":"none";h+=`<div class="day ${cls} ${date===TODAY?"today":""}"><span>${esc(wd(date))}</span><b>${sch?d+"/"+sch:"–"}</b></div>`;}return `<div class="week">${h}</div>`;}
+
+/* ================= UI state ================= */
+let ui={role:"therapist",view:"dashboard",pid:null,tab:"overview",cm:null,q:"",spec:"all",portal:null,ptab:"today",cmpA:"",cmpB:""};
+try{const u=JSON.parse(localStorage.getItem("otp-ui")||"null");if(u)ui=Object.assign(ui,u);}catch(e){}
+const saveUi=()=>{try{localStorage.setItem("otp-ui",JSON.stringify(ui));}catch(e){}};
+const app=document.getElementById("app");
+
+function render(){
+ document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.title=t("brand");
+ document.getElementById("brandName").textContent=t("brand");
+ document.getElementById("lang-ar").setAttribute("aria-pressed",lang==="ar");document.getElementById("lang-en").setAttribute("aria-pressed",lang==="en");
+ document.getElementById("roleSeg").innerHTML=`<button type="button" data-act="role" data-v="therapist" aria-pressed="${ui.role==="therapist"}">${esc(t("therapist"))}</button><button type="button" data-act="role" data-v="patient" aria-pressed="${ui.role==="patient"}">${esc(t("patient"))}</button>`;
+ const nav=document.getElementById("nav");
+ if(ui.role==="therapist"){const it=[["dashboard","dashboard"],["patients","patients"],["library","library"]];
+  nav.innerHTML=it.map(([v,k])=>`<button type="button" data-act="go" data-v="${v}" aria-current="${ui.view===v||(v==="patients"&&(ui.view==="file"||ui.view==="report"))}">${esc(t(k))}</button>`).join("");
+  app.innerHTML=ui.view==="patients"?vPatients():ui.view==="file"?vFile():ui.view==="library"?vLibrary():ui.view==="report"?vReport():vDash();}
+ else{const p=ui.portal&&P(ui.portal);nav.innerHTML=p?[["today","today"],["progress","myProgress"]].map(([v,k])=>`<button type="button" data-act="ptab" data-v="${v}" aria-current="${ui.ptab===v}">${esc(t(k))}</button>`).join("")+`<button type="button" data-act="plogout">${esc(t("logout"))}</button>`:"";
+  app.innerHTML=p?(ui.ptab==="progress"?vMyProgress(p):vToday(p)):vPortalLogin();}
+ saveUi();hydrate();window.scrollTo&&0;
+}
+
+/* ================= therapist views ================= */
+function vDash(){
+ const act=S.patients.filter(p=>p.status==="active");const since=iso(addDays(parse(TODAY),-7));
+ const sess=S.patients.reduce((n,p)=>n+p.sessions.filter(s=>s.date>=since).length,0);
+ const due=act.filter(p=>p.nextReassess&&dayDiff(TODAY,p.nextReassess)<=3);
+ const al=act.map(p=>({p,a:alerts(p).filter(x=>x.lv!=="info")})).filter(x=>x.a.length);
+ const near=act.map(p=>({p,g:nearGoals(p)})).filter(x=>x.g.length);
+ return `<div class="banner">${esc(t("demoNote"))}</div>
+ <div class="kpis"><div class="kpi"><b>${act.length}</b><span>${esc(t("active"))}</span></div><div class="kpi"><b>${sess}</b><span>${esc(t("sessionsWeek"))}</span></div><div class="kpi"><b>${due.length}</b><span>${esc(t("dueReassess"))}</span></div><div class="kpi ${al.length?"hot":""}"><b>${al.reduce((n,x)=>n+x.a.length,0)}</b><span>${esc(t("alertsN"))}</span></div></div>
+ <div class="grid">
+  <section class="card"><h2>${esc(t("needsAttention"))}</h2>${al.length?al.map(x=>`<div class="alert ${x.a[0].lv}"><div><button type="button" class="btn ghost" style="padding:0" data-act="open" data-v="${x.p.id}">${H(x.p.name)} · <span class="num">${x.p.id}</span></button><ul class="small muted" style="margin:4px 0 0;padding-inline-start:18px">${x.a.map(a=>`<li>${esc(a.tx)}</li>`).join("")}</ul></div></div>`).join(""):`<p class="muted">${esc(t("noAlerts"))}</p>`}</section>
+  <section class="card"><h2>${esc(t("dueReassess"))}</h2>${due.length?due.map(p=>`<div class="row between"><button type="button" class="btn ghost" data-act="open" data-v="${p.id}">${H(p.name)}</button><span class="chip ${dayDiff(TODAY,p.nextReassess)<=0?"warn":""}">${esc(fmt(p.nextReassess))}</span></div>`).join(""):`<p class="muted">—</p>`}
+   <h2 style="margin-top:8px">${esc(t("nearGoals"))}</h2>${near.length?near.map(x=>x.g.map(g=>`<div class="row between"><button type="button" class="btn ghost" data-act="open" data-v="${x.p.id}">${H(x.p.name)}</button><span class="chip">${H(meas(x.p,g.m).name)} ${Math.round(goalPct(x.p,g)*100)}%</span></div>`).join("")).join(""):`<p class="muted">—</p>`}</section>
+ </div>
+ <section class="card"><div class="row between"><h2>${esc(t("patients"))}</h2><button type="button" class="btn primary" data-act="newPatient">+ ${esc(t("newPatient"))}</button></div><div class="plist">${act.map(pCard).join("")}</div></section>
+ <div class="row noprint"><button type="button" class="btn sm" data-act="export">${esc(t("exportData"))}</button><label class="btn sm" for="importFile">${esc(t("importData"))}</label><input type="file" id="importFile" accept="application/json" hidden><button type="button" class="btn sm danger" data-act="reset">${esc(t("reset"))}</button></div>`;}
+function pCard(p){const a=adh(p,7);const al=alerts(p);const worst=al.find(x=>x.lv==="crit")?"crit":al.find(x=>x.lv==="warn")?"warn":"";
+ return `<button type="button" class="pcard" data-act="open" data-v="${p.id}"><span class="avatar ${p.spec}">${esc(L(p.name).trim()[0]||"?")}</span><span style="display:grid;gap:2px;min-width:0"><span class="pname">${H(p.name)} <span class="muted small num">· ${p.id}</span></span><span class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${H(p.diagnosis)}</span><span class="row" style="gap:6px"><span class="chip grey">${esc(t(p.spec))}</span>${p.status!=="active"?`<span class="chip grey">${esc(t("discharged"))}</span>`:""}${worst?`<span class="chip ${worst}">${al.filter(x=>x.lv!=="info").length} ${esc(t("alertsN"))}</span>`:""}</span></span><span style="display:grid;justify-items:end;gap:4px"><span class="small muted">${esc(t("adh7"))}</span><b class="num ${a.pct!=null&&a.pct<60?"worse":""}">${a.pct==null?"–":a.pct+"%"}</b></span></button>`;}
+function vPatients(){const q=ui.q.trim().toLowerCase();
+ const list=S.patients.filter(p=>(ui.spec==="all"||p.spec===ui.spec)&&(!q||[p.id,p.name.ar,p.name.en,L(p.diagnosis)].join(" ").toLowerCase().includes(q)));
+ return `<section class="card"><div class="row between"><h1>${esc(t("patients"))}</h1><button type="button" class="btn primary" data-act="newPatient">+ ${esc(t("newPatient"))}</button></div>
+ <input type="text" id="q" placeholder="${esc(t("search"))}" value="${esc(ui.q)}" aria-label="${esc(t("search"))}">
+ <div class="tabs">${["all","hand","peds","neuro"].map(s=>`<button type="button" data-act="spec" data-v="${s}" aria-current="${ui.spec===s}">${esc(t(s))}</button>`).join("")}</div>
+ <div class="plist">${list.map(pCard).join("")||`<div class="empty">—</div>`}</div></section>`;}
+
+function vFile(){const p=P(ui.pid);if(!p){ui.view="patients";return vPatients();}
+ const tabs=["overview","progress","goals","sessions","hep","media","plan"];
+ const body={overview:tOverview,progress:tProgress,goals:tGoals,sessions:tSessions,hep:tHep,media:tMedia,plan:tPlan}[ui.tab]||tOverview;
+ const al=alerts(p);
+ return `<div class="row"><button type="button" class="btn sm" data-act="go" data-v="patients">${lang==="ar"?"→":"←"} ${esc(t("back"))}</button></div>
+ <section class="card"><div class="row" style="gap:12px;align-items:center"><span class="avatar ${p.spec}">${esc(L(p.name).trim()[0])}</span><div style="display:grid;gap:2px;flex:1;min-width:200px"><h1>${H(p.name)}</h1><div class="small muted"><span class="num">${p.id}</span> · ${p.age} ${esc(t("years"))} · ${esc(t(p.spec))} · ${esc(t("start"))} ${esc(fmt(p.start))}</div></div>
+ <span class="chip ${p.status==="active"?"":"grey"}">${esc(p.status==="active"?t("activeS"):t("discharged"))}</span></div>
+ <p class="small">${H(p.diagnosis)}</p>
+ ${al.length?`<div style="display:grid;gap:6px">${al.map(a=>`<div class="alert ${a.lv}"><span class="small">${esc(a.tx)}</span></div>`).join("")}</div>`:""}
+ </section>
+ <div class="tabs" role="tablist">${tabs.map(k=>`<button type="button" role="tab" data-act="tab" data-v="${k}" aria-current="${ui.tab===k}">${esc(t(k))}</button>`).join("")}</div>
+ ${body(p)}`;}
+function tOverview(p){const kv=[["id",p.id],["age",p.age+" "+t("years")],["specialty",t(p.spec)],["start",fmt(p.start)],["nextReassess",fmt(p.nextReassess)],["caregiver",L(p.caregiver)||"—"]];
+ const tx=[["diagnosis",p.diagnosis],["referral",p.referral],["history",p.history],["precautions",p.precautions],["problems",p.problems]];
+ return `<section class="card"><div class="row between"><h2>${esc(t("overview"))}</h2><button type="button" class="btn sm" data-act="editPatient">✎</button></div><div class="kv">${kv.map(([k,v])=>`<div><span>${esc(t(k))}:</span> <b class="num">${esc(v)}</b></div>`).join("")}</div>
+ ${tx.map(([k,v])=>`<div><h3 class="small muted">${esc(t(k))}</h3><p>${H(v)||"—"}</p></div>`).join("")}</section>
+ <section class="card"><h2>${esc(t("measuresBaseline"))}</h2>${measTable(p)}</section>
+ <section class="card"><div class="row between"><h2>${esc(t("adherence"))} · ${esc(t("thisWeek"))}</h2><button type="button" class="btn sm" data-act="tab" data-v="hep">${esc(t("hep"))}</button></div>${weekStrip(p)}</section>
+ <div class="row"><button type="button" class="btn" data-act="asPatient">${esc(t("toPatientView"))}</button></div>`;}
+function measTable(p){return `<div class="tbl-wrap"><table><thead><tr><th>${esc(t("measure"))}</th><th class="num">${esc(t("baseline"))}</th><th class="num">${esc(t("latest"))}</th><th class="num">${esc(t("change"))}</th><th class="num">${esc(t("target"))}</th></tr></thead><tbody>${p.measures.map(m=>{const a=first(p,m.id),b=last(p,m.id),c=chg(p,m.id),g=p.goals.find(x=>x.m===m.id);
+ return `<tr><td>${H(m.name)} <span class="muted small">${esc(m.unit)}</span><div class="muted" style="font-size:11.5px">${esc(m.up?t("higherBetter"):t("lowerBetter"))}</div></td><td class="num">${a?a.v:"—"}</td><td class="num">${b?b.v:"—"}</td><td class="num ${c?(c.good?"better":c.bad?"worse":""):""}">${c?sign(c.d):"—"}</td><td class="num">${g&&g.target!=null?g.target:"—"}</td></tr>`;}).join("")}</tbody></table></div>`;}
+function tProgress(p){const mid=(ui.cm&&meas(p,ui.cm))?ui.cm:p.measures[0]&&p.measures[0].id;const m=meas(p,mid);
+ const s=series(p,mid);
+ return `<section class="card"><div class="row between"><h2>${esc(t("progress"))}</h2><div class="row"><button type="button" class="btn sm" data-act="addMetric">+ ${esc(t("addMetric"))}</button><button type="button" class="btn sm primary" data-act="addMeasure">+ ${esc(t("addMeasure"))}</button></div></div>
+ <div class="tabs">${p.measures.map(x=>`<button type="button" data-act="cm" data-v="${x.id}" aria-current="${x.id===mid}">${H(x.name)}</button>`).join("")}</div>
+ ${m?`<div class="row small muted"><span class="chip grey">${esc(m.up?t("higherBetter"):t("lowerBetter"))}</span><span>${esc(m.unit)}</span></div>${lineChart(p,mid)}
+ <div class="tbl-wrap"><table><thead><tr><th>${esc(t("date"))}</th><th>${esc(t("type"))}</th><th class="num">${H(m.name)}</th><th></th></tr></thead><tbody>${s.slice().reverse().map(r=>`<tr><td>${esc(fmt(r.date))}</td><td>${esc(t(r.type))}</td><td class="num">${r.v} ${esc(m.unit)}</td><td><button type="button" class="btn ghost sm danger" data-act="delRec" data-v="${r.id}" aria-label="${esc(t("remove"))}">✕</button></td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">—</div>`}
+ </section>
+ ${p.hep.length?`<section class="card"><h2>${esc(t("adhVsOutcome"))}</h2>${weeklyAdh(p)}<p class="small muted">${esc(t("causalNote"))}</p></section>`:""}`;}
+function tGoals(p){return `<section class="card"><div class="row between"><h2>${esc(t("goals"))}</h2><button type="button" class="btn sm primary" data-act="addGoal">+ ${esc(t("addGoal"))}</button></div><p class="small muted">${esc(t("goalStatusNote"))}</p>
+ ${p.goals.length?p.goals.map(g=>{const pc=goalPct(p,g);const m=g.m&&meas(p,g.m);const a=m&&first(p,g.m),b=m&&last(p,g.m);
+ return `<div class="ex"><div class="row between"><span class="chip ${g.term==="short"?"":"warm"}">${esc(t(g.term))}</span><select data-act="goalSt" data-v="${g.id}" aria-label="${esc(t("status"))}" style="width:auto">${["not_started","in_progress","achieved","revised"].map(s=>`<option value="${s}" ${g.status===s?"selected":""}>${esc(t(s))}</option>`).join("")}</select></div>
+ <div class="title">${H(g.text)}</div>
+ ${m?`<div class="small muted num">${H(m.name)}: ${a?a.v:"—"} → ${b?b.v:"—"} / ${esc(t("target"))} ${g.target}${esc(m.unit)}</div><div class="bar ${pc<.3?"warn":""}"><i style="width:${Math.round((pc||0)*100)}%"></i></div>`:""}
+ <div class="row between small muted"><span>${esc(t("due"))}: ${esc(fmt(g.due))}</span><button type="button" class="btn ghost sm danger" data-act="delGoal" data-v="${g.id}">${esc(t("remove"))}</button></div></div>`;}).join(""):`<div class="empty">—</div>`}</section>`;}
+function tSessions(p){const ss=p.sessions.slice().sort((a,b)=>a.date<b.date?1:-1);
+ return `<section class="card"><div class="row between"><h2>${esc(t("sessionNotes"))} <span class="muted small num">(${ss.length})</span></h2><button type="button" class="btn sm primary" data-act="addSoap">+ ${esc(t("addSoap"))}</button></div>
+ ${ss.length?ss.map(s=>`<div class="ex"><div class="row between"><b>${esc(fmt(s.date))}</b><button type="button" class="btn ghost sm danger" data-act="delSoap" data-v="${s.id}">${esc(t("remove"))}</button></div>${["s","o","a","p"].map(k=>`<div><span class="chip grey">${k.toUpperCase()}</span> <span class="small">${H(s[k])||"—"}</span></div>`).join("")}</div>`).join(""):`<div class="empty">${esc(t("noSessions"))}</div>`}</section>`;}
+function tHep(p){const a=adh(p,14);const since=iso(addDays(parse(TODAY),-14));const rc={};p.logs.filter(l=>l.date>=since&&l.reason).forEach(l=>rc[l.reason]=(rc[l.reason]||0)+1);
+ return `<section class="card"><div class="row between"><h2>${esc(t("hep"))}</h2><button type="button" class="btn sm primary" data-act="addHep">+ ${esc(t("addEx"))}</button></div>
+ ${p.hep.length?p.hep.map(h=>{const e=ex(h.ex);const ls=p.logs.filter(l=>l.h===h.id&&l.date>=since);const c={done:0,partial:0,skipped:0};ls.forEach(l=>c[l.st]++);
+ return `<div class="ex"><div class="row between"><div class="title">${H(e.name)}</div><button type="button" class="btn ghost sm danger" data-act="delHep" data-v="${h.id}">${esc(t("remove"))}</button></div><div class="small muted">${esc(hepDose(h))}</div>
+ <div class="row small"><span class="chip">${esc(t("done"))} ${c.done}</span><span class="chip warn">${esc(t("partial"))} ${c.partial}</span><span class="chip crit">${esc(t("skipped"))} ${c.skipped}</span></div></div>`;}).join(""):`<div class="empty">—</div>`}</section>
+ <section class="card"><h2>${esc(t("adherence"))} · ${esc(t("last14"))}</h2>
+ <div class="row between num"><span class="small muted">${esc(t("done"))} ${a.d} / ${esc(t("scheduled"))} ${a.sch}</span><b>${a.pct==null?"–":a.pct+"%"}</b></div><div class="bar ${a.pct<60?"crit":a.pct<80?"warn":""}"><i style="width:${a.pct||0}%"></i></div>
+ <div class="row small"><span class="chip warn">${esc(t("partial"))} ${a.pa}</span><span class="chip crit">${esc(t("skipped"))} ${a.sk}</span><span class="chip grey">${esc(t("notLogged"))} ${a.nl}</span></div>
+ ${weekStrip(p,14).replace('class="week"','class="week" style="grid-template-columns:repeat(7,1fr)"')}
+ ${Object.keys(rc).length?`<h3>${esc(t("reasonsSummary"))}</h3><div class="row">${Object.keys(rc).map(k=>`<span class="chip grey">${esc(t(k))}: ${rc[k]}</span>`).join("")}</div>`:""}
+ <p class="small muted">${esc(t("selfReport"))}</p></section>
+ <section class="card"><h2>${esc(t("patientNotes"))}</h2>${p.notes.length?p.notes.slice().sort((a,b)=>a.date<b.date?1:-1).map(n=>`<div class="alert"><span class="small"><b>${esc(fmt(n.date))}</b> · ${H(n.text)}</span></div>`).join(""):`<p class="muted">—</p>`}</section>`;}
+function tMedia(p){const imgs=p.media.slice().sort((a,b)=>a.date<b.date?-1:1);
+ const opt=sel=>imgs.map(m=>`<option value="${m.id}" ${sel===m.id?"selected":""}>${esc(fmtShort(m.date))} · ${H(m.label)}</option>`).join("");
+ const A=ui.cmpA&&imgs.find(m=>m.id===ui.cmpA)?ui.cmpA:(imgs[0]&&imgs[0].id),B=ui.cmpB&&imgs.find(m=>m.id===ui.cmpB)?ui.cmpB:(imgs[imgs.length-1]&&imgs[imgs.length-1].id);
+ const info=m=>m?`<div class="small muted">${esc(fmt(m.date))} · ${H(m.label)}${m.pos?" · "+esc(m.pos):""}${m.angle?" · "+esc(m.angle):""}${m.assist?" · "+esc(m.assist):""}</div>`:"";
+ return `<section class="card"><div class="row between"><h2>${esc(t("media"))}</h2><button type="button" class="btn sm primary" data-act="addMedia">+ ${esc(t("upload"))}</button></div>
+ ${imgs.length?`<div class="media">${imgs.map(m=>`<div class="mitem"><img data-media="${m.id}" alt="${H(m.label)}"><div class="cap"><b>${esc(fmtShort(m.date))}</b><span class="muted">${H(m.label)}</span>${m.goal?`<span class="chip grey" style="justify-self:start">${esc((p.goals.find(g=>g.id===m.goal)||{}).id?L(p.goals.find(g=>g.id===m.goal).text).slice(0,28)+"…":"")}</span>`:""}<button type="button" class="btn ghost sm danger" data-act="delMedia" data-v="${m.id}" style="justify-self:start">${esc(t("remove"))}</button></div></div>`).join("")}</div>`:`<div class="empty">${esc(t("noMedia"))}</div>`}</section>
+ ${imgs.length>=2?`<section class="card"><h2>${esc(t("compare"))}</h2><div class="frow"><label class="f">${esc(t("before"))}<select data-act="cmp" data-v="A">${opt(A)}</select></label><label class="f">${esc(t("after"))}<select data-act="cmp" data-v="B">${opt(B)}</select></label></div>
+ <div class="compare"><div class="mwrap"><img data-media="${A}" alt="">${info(imgs.find(m=>m.id===A))}</div><div class="mwrap"><img data-media="${B}" alt="">${info(imgs.find(m=>m.id===B))}</div></div></section>`:""}`;}
+function tPlan(p){return `<section class="card"><div class="row between"><h2>${esc(t("planHistory"))}</h2><button type="button" class="btn sm" data-act="addPlan">+ ${esc(t("addPlanChange"))}</button></div>
+ ${p.plan.slice().sort((a,b)=>a.date<b.date?1:-1).map(x=>`<div class="alert"><div class="small"><b>${esc(fmt(x.date))}</b> · ${H(x.change)}<div class="muted">${esc(t("why"))}: ${H(x.why)}</div></div></div>`).join("")}</section>
+ <section class="card"><div class="row between"><h2>${esc(t("milestones"))}</h2><button type="button" class="btn sm" data-act="addMilestone">+ ${esc(t("addMilestone"))}</button></div>
+ ${p.milestones.length?p.milestones.map(x=>`<div class="alert"><span class="small"><b>${esc(fmt(x.date))}</b> · ${H(x.text)}</span></div>`).join(""):`<p class="muted">—</p>`}</section>
+ <section class="card">${p.status==="active"?`<button type="button" class="btn warm" data-act="discharge">${esc(t("discharge"))}</button>`:`<p>${esc(t("dischargedOn"))} ${esc(fmt(p.discharge&&p.discharge.date))}</p><div class="row"><button type="button" class="btn primary" data-act="report">${esc(t("viewReport"))}</button><button type="button" class="btn" data-act="reopen">${esc(t("reopen"))}</button></div>`}</section>`;}
+function vReport(){const p=P(ui.pid);if(!p)return vDash();const d=p.discharge||{};const a=adh(p,Math.max(1,dayDiff(p.start,d.date||TODAY)),parse(d.date||TODAY));
+ const ach=p.goals.filter(g=>g.status==="achieved").length;
+ return `<div class="row noprint"><button type="button" class="btn sm" data-act="tab" data-v="plan">${lang==="ar"?"→":"←"} ${esc(t("back"))}</button><button type="button" class="btn sm primary" data-act="print">${esc(t("print"))}</button></div>
+ <article class="report"><div><div class="small muted">${esc(t("brand"))}</div><h1>${esc(t("report"))} · Discharge Summary</h1></div>
+ <div class="kv"><div><span>${esc(t("name"))}:</span> <b>${H(p.name)}</b></div><div><span>${esc(t("id"))}:</span> <b class="num">${p.id}</b></div><div><span>${esc(t("age"))}:</span> <b>${p.age}</b></div><div><span>${esc(t("specialty"))}:</span> <b>${esc(t(p.spec))}</b></div><div><span>${esc(t("start"))}:</span> <b>${esc(fmt(p.start))}</b></div><div><span>${esc(t("dischargedOn"))}:</span> <b>${esc(fmt(d.date))}</b></div><div><span>${esc(t("sessionsCount"))}:</span> <b class="num">${p.sessions.length}</b></div><div><span>${esc(t("dReason"))}:</span> <b>${esc(d.reason?t(d.reason):"—")}</b></div></div>
+ <div><h3>${esc(t("diagnosis"))}</h3><p>${H(p.diagnosis)}</p><h3 style="margin-top:8px">${esc(t("referral"))}</h3><p>${H(p.referral)}</p></div>
+ <div><h2>${esc(t("measuresBaseline"))}</h2>${measTable(p)}</div>
+ <div><h2>${esc(t("goals"))} <span class="small muted num">(${esc(t("goalsAchieved"))}: ${ach} ${esc(t("ofGoals"))} ${p.goals.length})</span></h2>${p.goals.map(g=>`<p class="small">• ${H(g.text)}: <b>${esc(t(g.status))}</b></p>`).join("")}</div>
+ ${p.measures.slice(0,2).map(m=>series(p,m.id).length>1?`<div><h3>${H(m.name)}</h3>${lineChart(p,m.id)}</div>`:"").join("")}
+ <div><h2>${esc(t("interventions"))}</h2>${p.hep.map(h=>`<p class="small">• ${H(ex(h.ex).name)} (${esc(hepDose(h))})</p>`).join("")}<p class="small">${esc(t("adherence"))}: <b class="num">${a.pct==null?"–":a.pct+"%"}</b> (${esc(t("done"))} ${a.d} / ${a.sch})</p></div>
+ ${p.milestones.length?`<div><h2>${esc(t("milestones"))}</h2>${p.milestones.map(x=>`<p class="small">• ${esc(fmt(x.date))}: ${H(x.text)}</p>`).join("")}</div>`:""}
+ <div><h2>${esc(t("recs"))}</h2><p>${H(d.recs)||"—"}</p>${d.followUp?`<p class="small">${esc(t("followUp"))}: <b>${esc(fmt(d.followUp))}</b></p>`:""}</div></article>`;}
+function vLibrary(){return `<section class="card"><div class="row between"><h1>${esc(t("exLib"))}</h1><button type="button" class="btn sm primary" data-act="newEx">+ ${esc(t("newEx"))}</button></div>
+ ${["hand","peds","neuro"].map(a=>`<h2>${esc(t(a))}</h2><div class="grid">${S.lib.filter(e=>e.area===a).map(e=>`<div class="ex"><div class="title">${H(e.name)}</div><p class="small muted">${H(e.desc)}</p><div class="mwrap" hidden><video data-media="ex-${e.id}" controls playsinline></video></div><div class="row"><span class="chip ${e.video?"":"grey"}">${esc(e.video?t("hasVideo"):t("noVideo"))}</span><label class="btn sm" for="v-${e.id}">${esc(t("attachVideo"))}</label><input type="file" id="v-${e.id}" accept="video/*,image/*" hidden data-exvid="${e.id}"></div></div>`).join("")}</div>`).join("")}</section>`;}
+
+/* ================= patient portal ================= */
+function vPortalLogin(){return `<section class="card"><h1>${esc(t("choosePatient"))}</h1><div class="plist">${S.patients.filter(p=>p.status==="active").map(p=>`<button type="button" class="pcard" data-act="plogin" data-v="${p.id}"><span class="avatar ${p.spec}">${esc(L(p.name).trim()[0])}</span><span class="pname">${H(p.name)}${p.caregiver?` <span class="small muted">· ${H(p.caregiver)}</span>`:""}</span><span class="num muted small">${p.id}</span></button>`).join("")}</div></section>`;}
+function vToday(p){const today=p.hep.filter(h=>TODAY>=h.from);
+ return `<section class="card"><h1>${esc(t("greet"))} ${H(p.name).split(" ")[0]} 👋</h1><p class="muted small">${esc(fmt(TODAY))}</p>${weekStrip(p)}</section>
+ <section class="card"><h2>${esc(t("today"))}</h2>${today.length?today.map(h=>{const e=ex(h.ex);const l=p.logs.find(x=>x.date===TODAY&&x.h===h.id);
+ return `<div class="ex ${l&&l.st==="done"?"done":""}"><div class="title">${H(e.name)}</div><div class="small"><b>${esc(t("dose"))}:</b> ${esc(hepDose(h))}</div><p class="small muted">${H(e.desc)}</p>
+ <div class="mwrap" hidden><video data-media="ex-${e.id}" controls playsinline></video></div>
+ <div class="small muted">${esc(t("howDid"))}</div><div class="stbtns">${["done","partial","skipped"].map(s=>`<button type="button" data-act="log" data-h="${h.id}" data-v="${s}" class="${l&&l.st===s?"on-"+s:""}">${esc(t(s))}</button>`).join("")}</div>
+ ${l&&l.reason?`<div class="small muted">${esc(t("reason"))}: ${esc(t(l.reason))}${l.note?" · "+esc(l.note):""}</div>`:""}</div>`;}).join(""):`<div class="empty">${esc(t("nothingToday"))}</div>`}
+ <button type="button" class="btn" data-act="pnote">+ ${esc(t("addNote"))}</button></section>
+ <div class="banner">${esc(t("safety"))}</div>`;}
+function vMyProgress(p){return `<section class="card"><h1>${esc(t("myProgress"))}</h1><p class="small muted">${esc(t("start"))}: ${esc(fmt(p.start))} · ${p.sessions.length} ${esc(t("sessions"))}</p></section>
+ <section class="card"><h2>${esc(t("myGoals"))}</h2>${p.goals.map(g=>{const pc=goalPct(p,g);return `<div class="ex"><div class="row between"><span class="title">${H(g.text)}</span><span class="chip ${g.status==="achieved"?"":"grey"}">${esc(t(g.status))}</span></div>${pc!=null?`<div class="bar"><i style="width:${Math.round(pc*100)}%"></i></div>`:""}</div>`;}).join("")}<p class="small muted">${esc(t("goalStatusNote"))}</p></section>
+ ${p.measures.slice(0,2).map(m=>series(p,m.id).length>1?`<section class="card"><h2>${H(m.name)}</h2><span class="chip grey" style="justify-self:start">${esc(m.up?t("higherBetter"):t("lowerBetter"))}</span>${lineChart(p,m.id)}</section>`:"").join("")}
+ <section class="card"><h2>${esc(t("milestones"))}</h2>${p.milestones.length?p.milestones.map(x=>`<div class="alert"><span class="small"><b>${esc(fmt(x.date))}</b> · ${H(x.text)}</span></div>`).join(""):`<p class="muted">—</p>`}</section>`;}
+
+/* ================= dialogs ================= */
+const dlg=document.getElementById("dlg"),dform=document.getElementById("dlgForm");let onSubmit=null;
+function openDlg(title,inner,fn,submitLabel){dform.innerHTML=`<h2>${esc(title)}</h2>${inner}<p class="small" id="dlgErr" style="color:var(--crit)" hidden></p><div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="dlgClose">${esc(t("cancel"))}</button><button type="submit" class="btn primary">${esc(submitLabel||t("save"))}</button></div>`;onSubmit=fn;try{dlg.showModal();}catch(e){dlg.setAttribute("open","");}const f=dform.querySelector("input,select,textarea");f&&f.focus();}
+function closeDlg(){try{dlg.close();}catch(e){dlg.removeAttribute("open");}onSubmit=null;}
+function dErr(m){const e=document.getElementById("dlgErr");e.textContent=m;e.hidden=false;}
+const fv=n=>{const el=dform.elements[n];return el?(el.type==="checkbox"?el.checked:el.value.trim()):"";};
+const fld=(n,label,type,val,extra)=>`<label class="f" for="f-${n}">${esc(label)}<input type="${type||"text"}" id="f-${n}" name="${n}" value="${esc(val==null?"":val)}" ${extra||""}></label>`;
+const ta=(n,label,val)=>`<label class="f" for="f-${n}">${esc(label)}<textarea id="f-${n}" name="${n}">${esc(val||"")}</textarea></label>`;
+const sel=(n,label,opts,val)=>`<label class="f" for="f-${n}">${esc(label)}<select id="f-${n}" name="${n}">${opts.map(([v,l])=>`<option value="${esc(v)}" ${String(val)===String(v)?"selected":""}>${esc(l)}</option>`).join("")}</select></label>`;
+const bi=v=>({ar:v,en:v});
+
+function dlgPatient(p){const isNew=!p;p=p||{};
+ openDlg(isNew?t("newPatient"):L(p.name),`${fld("name",t("name"),"text",L(p.name),"required")}<div class="frow">${fld("age",t("age"),"number",p.age,'min="0" max="120" required')}${sel("spec",t("specialty"),[["hand",t("hand")],["peds",t("peds")],["neuro",t("neuro")]],p.spec||"hand")}${fld("start",t("start"),"date",p.start||TODAY)}${fld("nextReassess",t("nextReassess"),"date",p.nextReassess||iso(addDays(new Date(),28)))}</div>
+ ${fld("diagnosis",t("diagnosis"),"text",L(p.diagnosis),"required")}${fld("referral",t("referral"),"text",L(p.referral))}${ta("history",t("history"),L(p.history))}${ta("precautions",t("precautions"),L(p.precautions))}${ta("problems",t("problems"),L(p.problems))}${fld("caregiver",t("caregiver"),"text",L(p.caregiver))}`,
+ ()=>{if(!fv("name")||!fv("diagnosis")||!fv("age"))return dErr(t("required"));
+  const o={name:bi(fv("name")),age:+fv("age"),spec:fv("spec"),start:fv("start")||TODAY,nextReassess:fv("nextReassess"),diagnosis:bi(fv("diagnosis")),referral:bi(fv("referral")),history:bi(fv("history")),precautions:bi(fv("precautions")),problems:bi(fv("problems")),caregiver:fv("caregiver")?bi(fv("caregiver")):""};
+  if(isNew){S.seq=(S.seq||S.patients.length)+1;const id="OT-"+String(S.seq).padStart(4,"0");S.patients.unshift(Object.assign({id,status:"active",sex:"",measures:SPEC_TPL[o.spec].map(mkMeasure),records:[],goals:[],sessions:[],hep:[],logs:[],notes:[],media:[],plan:[{date:o.start,change:bi(lang==="ar"?"إنشاء الملف":"File created"),why:bi("—")}],milestones:[],discharge:null},o));ui.pid=id;ui.view="file";ui.tab="progress";}
+  else Object.assign(p,o);
+  save();closeDlg();render();if(isNew)setTimeout(()=>dlgMeasure(P(ui.pid),"initial"),50);});}
+function dlgMeasure(p,type){openDlg(t("addMeasure"),`<div class="frow">${fld("date",t("date"),"date",TODAY)}${sel("type",t("type"),[["initial",t("initial")],["session",t("session")],["reassessment",t("reassessment")]],type||(p.records.length?"session":"initial"))}</div><p class="small muted">${esc(lang==="ar"?"اترك الخانة فارغة إذا لم تُقس في هذه الزيارة.":"Leave blank if not measured this visit.")}</p>
+ ${p.measures.map(m=>fld("m_"+m.id,L(m.name)+" ("+m.unit+")","number","",'step="any"')).join("")}`,
+ ()=>{const date=fv("date")||TODAY,type2=fv("type");let n=0;p.measures.forEach(m=>{const v=fv("m_"+m.id);if(v!==""&&!isNaN(+v)){p.records.push({id:uid("r"),m:m.id,date,v:+v,type:type2});n++;}});if(!n)return dErr(t("required"));
+  if(type2==="reassessment")p.plan.push({date,change:bi(lang==="ar"?"إعادة تقييم":"Reassessment"),why:bi("—")});save();closeDlg();render();});}
+function dlgMetric(p){openDlg(t("addMetric"),`${sel("tpl",lang==="ar"?"من القوالب":"From templates",[["",lang==="ar"?"— مؤشر مخصص —":"— Custom —"]].concat(Object.keys(MT).filter(k=>!meas(p,k)).map(k=>[k,L(MT[k].name)])),"")}${fld("name",t("name"))}<div class="frow">${fld("unit",t("unit"))}${sel("up",lang==="ar"?"الاتجاه":"Direction",[["1",t("higherBetter")],["0",t("lowerBetter")]],"1")}</div>`,
+ ()=>{const k=fv("tpl");if(k){p.measures.push(mkMeasure(k));}else{if(!fv("name"))return dErr(t("required"));p.measures.push({id:uid("m"),name:bi(fv("name")),unit:fv("unit"),up:fv("up")==="1",floor:null});}save();closeDlg();render();});}
+function dlgGoal(p){openDlg(t("addGoal"),`${ta("text",t("goalText"))}<div class="frow">${sel("term",t("type"),[["short",t("short")],["long",t("long")]],"short")}${sel("m",t("linkedMeasure"),[["",t("none")]].concat(p.measures.map(m=>[m.id,L(m.name)])),"")}${fld("target",t("target"),"number","",'step="any"')}${fld("due",t("due"),"date",iso(addDays(new Date(),28)))}</div>`,
+ ()=>{if(!fv("text"))return dErr(t("required"));p.goals.push({id:uid("g"),term:fv("term"),text:bi(fv("text")),m:fv("m"),target:fv("target")===""?null:+fv("target"),due:fv("due"),status:"not_started"});save();closeDlg();render();});}
+function dlgSoap(p){openDlg(t("addSoap"),`${fld("date",t("date"),"date",TODAY)}${ta("s",t("S"))}${ta("o",t("O"))}${ta("a",t("A"))}${ta("p",t("P"))}`,
+ ()=>{if(!fv("s")&&!fv("o")&&!fv("a")&&!fv("p"))return dErr(t("required"));p.sessions.push({id:uid("s"),date:fv("date")||TODAY,s:bi(fv("s")),o:bi(fv("o")),a:bi(fv("a")),p:bi(fv("p"))});save();closeDlg();render();});}
+function dlgHep(p){const lib=S.lib.slice().sort((a,b)=>(a.area===p.spec?-1:0)-(b.area===p.spec?-1:0));
+ openDlg(t("addEx"),`${sel("ex",t("exLib"),lib.map(e=>[e.id,L(e.name)+" · "+t(e.area)]),lib[0].id)}<div class="frow">${fld("sets",t("sets"),"number","",'min="0"')}${fld("reps",t("reps"),"number","",'min="0"')}${fld("minutes",t("minutes"),"number","",'min="0"')}${fld("perDay",t("perDay"),"number","1",'min="1"')}</div>`,
+ ()=>{const e=ex(fv("ex"));const d=e.dose||{};p.hep.push({id:uid("h"),ex:fv("ex"),sets:+fv("sets")||d.sets||0,reps:+fv("reps")||d.reps||0,minutes:+fv("minutes")||(fv("sets")?0:d.minutes||0),perDay:+fv("perDay")||1,from:TODAY});
+  p.plan.push({date:TODAY,change:bi((lang==="ar"?"إضافة تمرين منزلي: ":"Added home exercise: ")+L(e.name)),why:bi("—")});save();closeDlg();render();});}
+function dlgMedia(p){openDlg(t("upload"),`<label class="f" for="f-file">${esc(t("file"))}<input type="file" id="f-file" name="file" accept="image/*,video/*" required></label>${fld("label",t("label"),"text","",'required')}<div class="frow">${fld("date",t("date"),"date",TODAY)}${sel("goal",t("linkedGoal"),[["",t("none")]].concat(p.goals.map(g=>[g.id,L(g.text).slice(0,40)])),"")}</div><div class="frow">${fld("pos",t("position"))}${fld("angle",t("angle"))}${fld("assist",t("assist"))}</div><label class="check"><input type="checkbox" name="consent" id="f-consent"> <span>${esc(t("consent"))}</span></label>`,
+ async()=>{const f=dform.elements.file.files[0];if(!f||!fv("label"))return dErr(t("required"));if(!fv("consent"))return dErr(t("consentNeeded"));if(f.size>60*1024*1024)return dErr(t("fileTooBig"));
+  const id=uid("md");try{await mput(id,f);}catch(e){return dErr(t("mediaFail"));}p.media.push({id,date:fv("date")||TODAY,label:bi(fv("label")),goal:fv("goal"),pos:fv("pos"),angle:fv("angle"),assist:fv("assist"),kind:f.type});save();closeDlg();render();});}
+function dlgPlan(p){openDlg(t("addPlanChange"),`${fld("date",t("date"),"date",TODAY)}${ta("change",t("changeTxt"))}${ta("why",t("why"))}`,()=>{if(!fv("change")||!fv("why"))return dErr(t("required"));p.plan.push({date:fv("date")||TODAY,change:bi(fv("change")),why:bi(fv("why"))});save();closeDlg();render();});}
+function dlgMilestone(p){openDlg(t("addMilestone"),`${fld("date",t("date"),"date",TODAY)}${ta("text",t("label"))}`,()=>{if(!fv("text"))return dErr(t("required"));p.milestones.push({date:fv("date")||TODAY,text:bi(fv("text"))});save();closeDlg();render();});}
+function dlgDischarge(p){openDlg(t("discharge"),`${fld("date",t("date"),"date",TODAY)}${sel("reason",t("dReason"),["goals_met","home_program","referred","dropout"].map(k=>[k,t(k)]),"goals_met")}${ta("recs",t("recs"))}${fld("followUp",t("followUp"),"date","")}`,
+ ()=>{p.status="discharged";p.discharge={date:fv("date")||TODAY,reason:fv("reason"),recs:bi(fv("recs")),followUp:fv("followUp")};p.plan.push({date:p.discharge.date,change:bi(lang==="ar"?"الخروج من الخدمة":"Discharged"),why:bi(t(fv("reason")))});save();closeDlg();ui.view="report";render();});}
+function dlgLog(p,h,st){openDlg(t(st),`${sel("reason",t("reason"),["pain","difficulty","time","unclear","other"].map(k=>[k,t(k)]),"pain")}${ta("note",t("note"))}`,()=>{setLog(p,h,st,fv("reason"),fv("note"));closeDlg();render();});}
+function dlgNote(p){openDlg(t("addNote"),ta("text",t("note")),()=>{if(!fv("text"))return dErr(t("required"));p.notes.push({date:TODAY,text:bi(fv("text"))});save();closeDlg();render();});}
+function dlgEx(){openDlg(t("newEx"),`${fld("name",t("name"),"text","",'required')}${sel("area",t("area"),[["hand",t("hand")],["peds",t("peds")],["neuro",t("neuro")]],"hand")}${ta("desc",t("desc"))}<div class="frow">${fld("sets",t("sets"),"number")}${fld("reps",t("reps"),"number")}${fld("minutes",t("minutes"),"number")}</div>`,
+ ()=>{if(!fv("name"))return dErr(t("required"));S.lib.push({id:uid("e"),area:fv("area"),name:bi(fv("name")),desc:bi(fv("desc")),dose:{sets:+fv("sets")||0,reps:+fv("reps")||0,minutes:+fv("minutes")||0,perDay:1}});save();closeDlg();render();});}
+function dlgConfirm(msg,fn){openDlg(t("confirm"),`<p>${esc(msg)}</p>`,()=>{closeDlg();fn();},t("confirm"));}
+function setLog(p,h,st,reason,note){p.logs=p.logs.filter(l=>!(l.date===TODAY&&l.h===h));p.logs.push({date:TODAY,h,st,reason:reason||"",note:note||""});save();}
+
+let toastT;function toast(m){let el=document.getElementById("toast");if(!el){el=document.createElement("div");el.id="toast";el.setAttribute("role","status");el.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:99;max-width:90vw";document.body.appendChild(el);}el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,2600);}
+
+/* ================= events ================= */
+document.addEventListener("click",e=>{const a=e.target.closest("[data-act]");if(!a)return;const act=a.dataset.act,v=a.dataset.v;const p=ui.pid&&P(ui.pid);
+ if(a.tagName==="SELECT")return;
+ switch(act){
+  case"lang":lang=v;try{localStorage.setItem("otp-lang",v);}catch(_){}render();break;
+  case"role":ui.role=v;render();break;
+  case"go":ui.view=v;render();window.scrollTo(0,0);break;
+  case"open":ui.pid=v;ui.view="file";ui.tab="overview";ui.cm=null;render();window.scrollTo(0,0);break;
+  case"tab":ui.tab=v;ui.view="file";render();break;
+  case"spec":ui.spec=v;render();break;
+  case"cm":ui.cm=v;render();break;
+  case"newPatient":dlgPatient(null);break;
+  case"editPatient":dlgPatient(p);break;
+  case"addMeasure":dlgMeasure(p);break;
+  case"addMetric":dlgMetric(p);break;
+  case"delRec":dlgConfirm(t("remove")+"?",()=>{p.records=p.records.filter(r=>r.id!==v);save();render();});break;
+  case"addGoal":dlgGoal(p);break;
+  case"delGoal":dlgConfirm(t("remove")+"?",()=>{p.goals=p.goals.filter(g=>g.id!==v);save();render();});break;
+  case"addSoap":dlgSoap(p);break;
+  case"delSoap":dlgConfirm(t("remove")+"?",()=>{p.sessions=p.sessions.filter(s=>s.id!==v);save();render();});break;
+  case"addHep":dlgHep(p);break;
+  case"delHep":dlgConfirm(t("remove")+"?",()=>{const h=p.hep.find(x=>x.id===v);p.hep=p.hep.filter(x=>x.id!==v);if(h)p.plan.push({date:TODAY,change:bi((lang==="ar"?"إيقاف تمرين: ":"Stopped exercise: ")+L(ex(h.ex).name)),why:bi("—")});save();render();});break;
+  case"addMedia":dlgMedia(p);break;
+  case"delMedia":dlgConfirm(t("remove")+"?",()=>{p.media=p.media.filter(m=>m.id!==v);mdel(v);save();render();});break;
+  case"addPlan":dlgPlan(p);break;
+  case"addMilestone":dlgMilestone(p);break;
+  case"discharge":dlgDischarge(p);break;
+  case"report":ui.view="report";render();window.scrollTo(0,0);break;
+  case"reopen":p.status="active";p.plan.push({date:TODAY,change:bi(t("reopen")),why:bi("—")});save();render();break;
+  case"print":try{window.print();}catch(_){}break;
+  case"asPatient":ui.role="patient";ui.portal=p.id;ui.ptab="today";render();window.scrollTo(0,0);break;
+  case"newEx":dlgEx();break;
+  case"plogin":ui.portal=v;ui.ptab="today";render();break;
+  case"plogout":ui.portal=null;render();break;
+  case"ptab":ui.ptab=v;render();break;
+  case"log":{const pp=P(ui.portal);if(v==="done"){setLog(pp,a.dataset.h,"done");render();}else dlgLog(pp,a.dataset.h,v);break;}
+  case"pnote":dlgNote(P(ui.portal));break;
+  case"dlgClose":closeDlg();break;
+  case"export":{try{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const u=URL.createObjectURL(b);const l=document.createElement("a");l.href=u;l.download="ot-platform-backup-"+TODAY+".json";document.body.appendChild(l);l.click();l.remove();toast(t("exportNote"));}catch(_){}break;}
+  case"reset":dlgConfirm(t("resetQ"),()=>{S=seed();save();ui.view="dashboard";ui.pid=null;ui.portal=null;render();});break;
+ }});
+document.addEventListener("change",async e=>{const el=e.target;
+ if(el.dataset.act==="goalSt"){const p=P(ui.pid);const g=p.goals.find(x=>x.id===el.dataset.v);if(g){g.status=el.value;save();render();}}
+ else if(el.dataset.act==="cmp"){if(el.dataset.v==="A")ui.cmpA=el.value;else ui.cmpB=el.value;render();}
+ else if(el.id==="importFile"&&el.files[0]){try{const d=JSON.parse(await el.files[0].text());if(!d||!Array.isArray(d.patients))throw 0;S=d;save();render();}catch(_){toast(t("importFail"));}}
+ else if(el.dataset.exvid&&el.files[0]){const f=el.files[0];if(f.size>60*1024*1024)return toast(t("fileTooBig"));try{await mput("ex-"+el.dataset.exvid,f);delete urlCache["ex-"+el.dataset.exvid];const e2=S.lib.find(x=>x.id===el.dataset.exvid);e2.video=true;save();render();}catch(_){toast(t("mediaFail"));}}
+});
+document.addEventListener("input",e=>{if(e.target.id==="q"){ui.q=e.target.value;const pos=e.target.selectionStart;render();const q=document.getElementById("q");if(q){q.focus();try{q.setSelectionRange(pos,pos);}catch(_){}}}});
+dform.addEventListener("submit",e=>{e.preventDefault();if(onSubmit)onSubmit();});
+dlg.addEventListener("cancel",()=>{onSubmit=null;});
+
+load();render();
+})();
+</script>
+</body>
+</html>
